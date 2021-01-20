@@ -24,9 +24,13 @@ devicePollingListener.on(
 
         if (device.failures === 0) device.online = true;
 
+        const deviceConfig = context.config.switch.find(
+            configDevice => configDevice.deviceConfig.deviceId === device.id
+        );
+
         if (device.failures === 0 && !switchState) {
             await context.api.devices.sendCommands(
-                context.config.switch,
+                [deviceConfig],
                 'switch',
                 'on'
             );
@@ -34,7 +38,7 @@ devicePollingListener.on(
         }
         if (device.failures > 4 && switchState) {
             await context.api.devices.sendCommands(
-                context.config.switch,
+                [deviceConfig],
                 'switch',
                 'off'
             );
