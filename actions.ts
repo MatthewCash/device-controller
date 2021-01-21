@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { deviceStateListner } from './main';
+import { deviceStateListner } from './devices';
 
 // LED Tree
 deviceStateListner.on('0af5d793-8006-4cad-a19d-384a95b3c09a', value => {
