@@ -1,5 +1,5 @@
 import ping from 'ping';
-import { appId, devicePollingListener, smartapp } from './main';
+import { appId, devicePollingListener, smartapp } from './devices';
 
 devicePollingListener.on(
     'cf3c2ecd-2c62-4a74-8078-fb0a01540354',
@@ -24,7 +24,7 @@ devicePollingListener.on(
 
         if (device.failures === 0) device.online = true;
 
-        const deviceConfig = context.config.switch.find(
+        const deviceConfig = context.config.devices.find(
             configDevice => configDevice.deviceConfig.deviceId === device.id
         );
 
@@ -44,6 +44,6 @@ devicePollingListener.on(
             );
             device.online = false;
         }
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 500));
     }
 );
