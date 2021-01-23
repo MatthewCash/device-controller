@@ -2,7 +2,7 @@ import { SmartThingsDevice } from './schema';
 
 export class ContextStore {
     constructor() {}
-    async get(installedAppId) {
+    async get(installedAppId: string) {
         return SmartThingsDevice.findOne({ installedAppId });
     }
 
@@ -24,7 +24,7 @@ export class ContextStore {
         return data.save();
     }
 
-    async update(installedAppId, params) {
+    async update(installedAppId: string, params) {
         const data = await SmartThingsDevice.findOne({
             installedAppId: installedAppId
         });
@@ -35,7 +35,7 @@ export class ContextStore {
         return data.save();
     }
 
-    async delete(installedAppId) {
+    async delete(installedAppId: string) {
         return SmartThingsDevice.deleteOne({ installedAppId: installedAppId });
     }
 
@@ -44,6 +44,6 @@ export class ContextStore {
             installedAppId
         });
 
-        return context.config.devices;
+        return context?.config?.devices;
     }
 }
