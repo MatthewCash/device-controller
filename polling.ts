@@ -1,6 +1,7 @@
 import ping from 'ping';
 import { appId, devicePollingListener, smartapp } from './devices';
 
+// Computer
 devicePollingListener.on(
     'cf3c2ecd-2c62-4a74-8078-fb0a01540354',
     async device => {
@@ -44,6 +45,5 @@ devicePollingListener.on(
             );
             device.online = false;
         }
-        await new Promise(r => setTimeout(r, 500));
     }
 );
