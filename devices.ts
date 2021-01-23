@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { SmartApp } from '@smartthings/smartapp';
 import { ContextStore } from './database/store';
+import { sendDevices, sendDeviceUpdate } from './webSocket';
 import { EventEmitter } from 'events';
 
 export const appId = process.env.SMARTTHINGS_APP_ID;
@@ -9,10 +10,12 @@ class Device {
     id: string;
     failures: number;
     online: boolean;
-    constructor(id: string) {
+    name: string;
+    constructor(id: string, name: string) {
         this.id = id;
         this.failures = 0;
         this.online = null;
+        this.name = name;
     }
 }
 
@@ -73,10 +76,18 @@ export const smartapp = new SmartApp()
         const device = devices.find(device => device.id === deviceId);
         if (!device) return console.warn('Could not find device ' + deviceId);
 
-        if (value !== device.online) {
-            console.log(`Sending ${value} for ${deviceId}`);
-            deviceStateListner.emit(deviceId, value);
-        }
+        if (
+            devicePollingListener.rawListeners(deviceId).length &&
+            value === device.online
+        )
+            return;
+
+        console.log(`Sending ${value} for ${device.name} (${deviceId})`);
+        device.online = value;
+
+        deviceStateListner.emit(deviceId, value);
+
+        sendDeviceUpdate(deviceId, value);
     });
 
 const pollDevices = async () => {
@@ -85,9 +96,37 @@ const pollDevices = async () => {
         device => device.deviceConfig.deviceId
     );
 
-    deviceIds.forEach(deviceId => {
+    const initialDeviceCount = devices.length;
+
+    deviceIds.forEach(async deviceId => {
+        const context = await smartapp.withContext(appId);
+        const contextDevice = await context.api.devices
+            .getStatus(deviceId)
+            .catch(() => null);
+        if (!contextDevice) return;
+
+        const switchState =
+            contextDevice?.components?.main?.switch?.switch?.value === 'on';
+
+        const device = devices.find(device => device.id === deviceId);
+
+        if (device) {
+            if (device.online !== switchState) {
+                // device.online === switchState;
+                sendDeviceUpdate(deviceId, switchState);
+            }
+            return;
+        }
+
+        const deviceInfo = await context.api.devices.get(deviceId);
+        const deviceName = deviceInfo.label;
+
         if (devices.some(device => device.id === deviceId)) return;
-        devices.push(new Device(deviceId));
+        devices.push(new Device(deviceId, deviceName));
+
+        if (initialDeviceCount != devices.length) {
+            sendDevices();
+        }
     });
 
     return Promise.all(
@@ -123,4 +162,13 @@ export const setScene = async (state: boolean) => {
             Authorization: 'Bearer ' + process.env.SMARTTHINGS_SCENE_TOKEN
         }
     });
+};
+
+export const toggleScene = async () => {
+    // Toggle is based on status of computer
+    const computerDeviceId = 'cf3c2ecd-2c62-4a74-8078-fb0a01540354';
+    const online = devices.find(device => device.id === computerDeviceId)
+        .online;
+
+    return setScene(!online);
 };
