@@ -1,6 +1,7 @@
 import express from 'express';
 import { connectDatabase } from './database/connection';
-import { devices, setDevice, setScene, smartapp } from './devices';
+import { setDevice, setScene, smartapp, toggleScene } from './devices';
+import { startWebSocketServer } from './webSocket';
 
 const app = express();
 app.use(express.json());
@@ -22,13 +23,7 @@ app.post('/control', (req, res) => {
 
     if (data.scene != null) {
         if (data.scene === 'toggle') {
-            // Toggle is based on status of computer
-            const computerDeviceId = 'cf3c2ecd-2c62-4a74-8078-fb0a01540354';
-            const online = devices.find(
-                device => device.id === computerDeviceId
-            ).online;
-
-            setScene(!online);
+            toggleScene();
         } else {
             setScene(data.scene);
         }
@@ -48,6 +43,8 @@ const main = () => {
     app.listen(port, host);
 
     connectDatabase();
+
+    startWebSocketServer();
 
     console.log(`[Ready] Listening on http://${host}:${port}`);
 };
