@@ -19,17 +19,17 @@ class Device {
     }
 }
 
-class devicePolling extends EventEmitter {}
-declare interface devicePolling {
+class DevicePollingEvents extends EventEmitter {}
+declare interface DevicePollingEvents {
     on(event: string, listener: (device: Device) => Promise<void> | void);
 }
-export const devicePollingListener = new devicePolling();
+export const devicePollingListener = new DevicePollingEvents();
 
-class deviceStateEvents extends EventEmitter {}
-declare interface deviceStateEvents {
+class DeviceStateEvents extends EventEmitter {}
+declare interface DeviceStateEvents {
     on(event: string, listener: (value: boolean) => Promise<void> | void): this;
 }
-export const deviceStateListner = new deviceStateEvents();
+export const deviceStateListner = new DeviceStateEvents();
 
 import './actions';
 import './polling';
@@ -105,15 +105,14 @@ const pollDevices = async () => {
             .catch(() => null);
         if (!contextDevice) return;
 
-        const switchState =
+        const deviceState =
             contextDevice?.components?.main?.switch?.switch?.value === 'on';
 
         const device = devices.find(device => device.id === deviceId);
 
         if (device) {
-            if (device.online !== switchState) {
-                // device.online === switchState;
-                sendDeviceUpdate(deviceId, switchState);
+            if (device.online !== deviceState) {
+                sendDeviceUpdate(deviceId, deviceState);
             }
             return;
         }
