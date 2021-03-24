@@ -92,7 +92,12 @@ export const smartapp = new SmartApp()
 
 const pollDevices = async () => {
     const contextDevices = await ContextStore.getDevices(appId);
-    const deviceIds: string[] = contextDevices.map(
+
+    if (!(contextDevices instanceof Array)) {
+        return console.warn('Unable to get devices from SmartThings!');
+    }
+
+    const deviceIds: string[] = contextDevices?.map(
         device => device.deviceConfig.deviceId
     );
 
