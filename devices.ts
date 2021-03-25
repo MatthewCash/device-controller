@@ -141,6 +141,8 @@ const pollDevices = async () => {
 setInterval(pollDevices, 250);
 
 export const setDevice = async (id: string, state: boolean) => {
+    deviceStateListner.emit(id, state);
+
     const context = await smartapp.withContext(appId);
     const deviceConfig = context.config.devices.find(
         configDevice => configDevice.deviceConfig.deviceId === id
