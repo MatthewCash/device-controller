@@ -173,8 +173,8 @@ export const setScene = async (state: boolean) => {
 export const toggleScene = async () => {
     // Toggle is based on status of computer
     const computerDeviceId = 'cf3c2ecd-2c62-4a74-8078-fb0a01540354';
-    const online = devices.find(device => device.id === computerDeviceId)
-        .online;
+    const online =
+        devices.find(device => device.id === computerDeviceId)?.online ?? false;
 
     return setScene(!online);
 };
