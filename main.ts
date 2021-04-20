@@ -31,7 +31,7 @@ app.post('/control', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.status(400).send(
+    res.status(404).send(
         'This is an API endpoint. No usable web interface lives here.'
     );
 });
