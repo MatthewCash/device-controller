@@ -1,24 +1,25 @@
 {
-    "name": "computer-control",
-    "version": "1.0.0",
-    "description": "Computer Control",
+    "name": "device-controller",
+    "version": "2.0.0",
+    "description": "Device Controller",
     "author": "Matthew_Cash",
     "private": true,
     "scripts": {
         "dev": "ts-node-dev main.ts"
     },
     "dependencies": {
-        "@smartthings/smartapp": "^2.5.0",
-        "@types/express": "^4.17.11",
-        "@types/node": "^14.14.44",
-        "@types/ping": "^0.2.0",
-        "@types/ws": "^7.4.2",
+        "@types/express": "^4.17.13",
+        "@types/node": "^14.17.7",
+        "@types/ping": "^0.2.1",
+        "@types/ws": "^7.4.7",
         "axios": "^0.21.1",
+        "bufferutil": "^4.0.3",
         "express": "^4.16.4",
-        "mongoose": "^5.12.7",
+        "mongoose": "^5.13.5",
         "ping": "^0.4.1",
-        "ts-node": "^9.1.1",
-        "typescript": "^4.2.4",
-        "ws": "^7.4.6"
+        "ts-node": "^10.1.0",
+        "typescript": "^4.3.5",
+        "utf-8-validate": "^5.0.5",
+        "ws": "^8.0.0"
     }
 }

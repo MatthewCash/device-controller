@@ -1,52 +1,67 @@
-import express from 'express';
-import { connectDatabase } from './database/connection';
-import { setDevice, setScene, smartapp, toggleScene } from './devices';
-import { startWebSocketServer } from './webSocket';
+import { Device } from './Device';
+import deviceConstructors from './devices.json';
+import { startHttpServer } from './interface/http';
+import {
+    startWebSocketServer,
+    propagateWebsocketUpdate,
+    propagateWebsocketInternalUpdate
+} from './interface/ws';
 
-const app = express();
-app.use(express.json());
+export interface DeviceUpdate {
+    name: Device['name'];
+    id: Device['id'];
+    status: Device['status'];
+    updated?: boolean;
+}
 
-app.post('/', (req, res) => {
-    smartapp.handleHttpCallback(req, res);
+export interface DeviceUpdateRequest {
+    name: Device['name'];
+    id: Device['id'];
+    status: Device['status'];
+}
+
+export interface InternalDeviceUpdateRequest {
+    name: Device['name'];
+    id: Device['id'];
+    status: Device['status'];
+    updated?: boolean;
+}
+
+export interface InternalDeviceUpdate {
+    name: Device['name'];
+    id: Device['id'];
+    status: Device['status'];
+}
+
+export const devices = new Map<Device['id'], Device>();
+
+deviceConstructors.forEach(deviceConstructor => {
+    devices.set(deviceConstructor.id, new Device(deviceConstructor));
+    console.log(`Loaded device ${deviceConstructor.id}`);
 });
 
-app.post('/control', (req, res) => {
-    const data = req.body;
-    if (!data) return res.send('Invalid Body!');
-
-    if (typeof data.devices === 'object') {
-        for (const deviceId in data.device) {
-            const power = data.device[deviceId];
-            setDevice(deviceId, power);
-        }
-    }
-
-    if (data.scene != null) {
-        if (data.scene === 'toggle') {
-            toggleScene();
-        } else {
-            setScene(data.scene);
-        }
-    }
-});
-
-app.get('/', (req, res) => {
-    res.status(404).send(
-        'This is an API endpoint. No usable web interface lives here.'
-    );
-});
-
-const main = () => {
-    const port = Number(process.env.PORT ?? 3000);
-    const host = process.env.HOST ?? '0.0.0.0';
-
-    app.listen(port, host);
-
-    connectDatabase();
-
-    startWebSocketServer();
-
-    console.log(`[Ready] Listening on http://${host}:${port}`);
+export const updateDevice = (update: DeviceUpdateRequest) => {
+    const device = devices.get(update?.id);
+    if (!device) return;
+    device.updateStatus(update.status);
 };
 
-main();
+export const updateDeviceInternal = (update: InternalDeviceUpdate) => {
+    const device = devices.get(update?.id);
+    if (!device) return;
+    device.updateStatusInternal(update.status);
+    propagateDeviceUpdate(update);
+};
+
+export const propagateDeviceUpdate = (update: DeviceUpdate) => {
+    propagateWebsocketUpdate(update);
+};
+
+export const propagateInternalDeviceUpdate = (
+    update: InternalDeviceUpdateRequest
+) => {
+    propagateWebsocketInternalUpdate(update);
+};
+
+startWebSocketServer();
+startHttpServer();
