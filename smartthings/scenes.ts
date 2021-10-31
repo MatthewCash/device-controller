@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { devices } from '../main';
+import config from '../config.json';
 
 const sceneIds = {
-    on: '9e7a8603-2cd6-483c-b29f-86b7383430a2',
-    off: 'e07f550d-1976-4952-b997-88a6713ff2a5'
+    on: config.scenes.onSceneId,
+    off: config.scenes.offSceneId
 };
 
 export const setScene = async (sceneName: string) => {

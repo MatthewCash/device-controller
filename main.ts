@@ -1,5 +1,5 @@
 import { Device } from './Device';
-import deviceConstructors from './devices.json';
+import config from './config.json';
 import { startHttpServer } from './interface/http';
 import {
     startWebSocketServer,
@@ -35,7 +35,7 @@ export interface InternalDeviceUpdate {
 
 export const devices = new Map<Device['id'], Device>();
 
-deviceConstructors.forEach(deviceConstructor => {
+config.devices.forEach(deviceConstructor => {
     devices.set(deviceConstructor.id, new Device(deviceConstructor));
     console.log(`Loaded device ${deviceConstructor.id}`);
 });
