@@ -57,7 +57,7 @@ export const setScene = async (sceneName: string) => {
 };
 
 export const toggleScene = () => {
-    const sot = devices.get('computer').status;
+    const shouldTurnOff = devices.get('computer').status;
 
-    setScene(sot ? 'off' : 'on');
+    setScene(shouldTurnOff ? 'off' : 'on');
 };
