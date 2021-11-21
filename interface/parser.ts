@@ -17,9 +17,10 @@ const messageHandlers: MessageHandlers = {
     internalDeviceUpdate: (update: InternalDeviceUpdate) => {
         updateDeviceInternal(update);
     },
-    setScene: (scene?: string) => {
+    setScene: async (scene?: string) => {
         if (typeof scene === 'string') {
-            setScene(scene);
+            const success = await setScene(scene);
+            // TODO: Send error message if success is false
         } else {
             toggleScene();
         }

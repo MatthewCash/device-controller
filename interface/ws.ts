@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import { devices, DeviceUpdate, InternalDeviceUpdateRequest } from '../main';
-import { parseMessage } from './parse';
+import { parseMessage } from './parser';
 
 let ws: WebSocket.Server;
 

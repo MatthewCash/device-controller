@@ -1,5 +1,5 @@
 import express from 'express';
-import { parseMessage } from './parse';
+import { parseMessage } from './parser';
 
 const httpServer = express();
 
