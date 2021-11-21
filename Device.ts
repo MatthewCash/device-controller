@@ -4,11 +4,13 @@ import {
     propagateDeviceUpdate,
     propagateInternalDeviceUpdate
 } from './main';
+import { TpLinkDevice } from './tplink/TpLinkDevice';
 
 interface DeviceConstructor {
     name: Device['name'];
     id: Device['id'];
-    loopback: Device['loopback'];
+    loopback?: Device['loopback'];
+    tplink?: Device['tplink'];
 }
 
 export declare interface Device {
@@ -18,18 +20,31 @@ export declare interface Device {
     ): this;
 }
 
+interface TpLinkConfig {
+    ipAddress: string;
+}
+
 export class Device extends EventEmitter {
     name: string;
     id: string;
-    loopback: boolean;
+    loopback?: boolean;
+    tplink?: TpLinkConfig;
+    tplinkDevice?: TpLinkDevice;
     status: boolean;
 
-    constructor({ name, id, loopback }: DeviceConstructor) {
+    constructor({ name, id, loopback, tplink }: DeviceConstructor) {
         super();
 
         this.name = name;
         this.id = id;
         this.loopback = loopback;
+        this.tplink = tplink;
+
+        if (tplink?.ipAddress) this.loadTplinkDevice();
+    }
+
+    loadTplinkDevice() {
+        this.tplinkDevice = new TpLinkDevice(this.tplink.ipAddress);
     }
 
     toggleStatus() {
@@ -70,6 +85,8 @@ export class Device extends EventEmitter {
             status: updatedStatus,
             updated: isUpdate
         };
+
+        this.tplinkDevice?.setRelayPower(updatedStatus);
 
         propagateInternalDeviceUpdate(update);
     }
