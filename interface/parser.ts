@@ -4,7 +4,7 @@ import {
     updateDevice,
     updateDeviceInternal
 } from '../main';
-import { setScene, toggleScene } from '../smartthings/scenes';
+import { setScene, toggleScene } from '../scenes';
 
 interface MessageHandlers {
     [key: string]: (data, message) => void;
