@@ -22,6 +22,8 @@ export declare interface Device {
 
 interface TpLinkConfig {
     ipAddress: string;
+    propagate?: boolean;
+    monitor?: boolean;
 }
 
 export class Device extends EventEmitter {
@@ -86,7 +88,14 @@ export class Device extends EventEmitter {
             updated: isUpdate
         };
 
-        this.tplinkDevice?.setRelayPower(updatedStatus);
+        if (this.tplink?.propagate) {
+            this.tplinkDevice?.setRelayPower(updatedStatus).catch(error => {
+                console.warn(
+                    'An error occured while propagating TP-Link device update:'
+                );
+                console.error(error);
+            });
+        }
 
         propagateInternalDeviceUpdate(update);
     }
