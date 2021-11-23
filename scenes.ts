@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { devices } from './main';
 
 export const setScene = async (sceneName: string): Promise<boolean> => {
@@ -13,11 +14,31 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
 
             [...devices.values()].forEach(device => device.updateStatus(false));
 
+            axios
+                .post('http://127.0.0.1:1729/power', {
+                    power: false
+                })
+                .catch(error => {
+                    console.warn('An error occured while turning off lights!');
+                    console.error(error);
+                });
+
             return true;
         }
 
         case 'on': {
             [...devices.values()].forEach(device => device.updateStatus(true));
+
+            axios
+                .post('http://127.0.0.1:1729/white', {
+                    cold: true
+                })
+                .catch(error => {
+                    console.warn(
+                        'An error occured while setting lights to white!'
+                    );
+                    console.error(error);
+                });
 
             return true;
         }
