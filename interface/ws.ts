@@ -21,10 +21,11 @@ export const startWebSocketServer = () => {
         client.on('pong', () => (client.alive = true));
 
         const deviceList = [...devices.values()].map(
-            ({ id, name, status }) => ({
+            ({ id, name, status, tags }) => ({
                 id,
                 name,
-                status
+                status,
+                tags
             })
         );
 

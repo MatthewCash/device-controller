@@ -12,6 +12,7 @@ export interface DeviceUpdate {
     id: Device['id'];
     status: Device['status'];
     updated?: boolean;
+    tags?: Device['tags'];
 }
 
 export interface DeviceUpdateRequest {
@@ -25,6 +26,7 @@ export interface InternalDeviceUpdateRequest {
     id: Device['id'];
     status: Device['status'];
     updated?: boolean;
+    tags?: Device['tags'];
 }
 
 export interface InternalDeviceUpdate {

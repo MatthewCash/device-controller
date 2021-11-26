@@ -11,6 +11,7 @@ interface DeviceConstructor {
     id: Device['id'];
     loopback?: Device['loopback'];
     tplink?: Device['tplink'];
+    tags?: Device['tags'];
 }
 
 export declare interface Device {
@@ -33,14 +34,16 @@ export class Device extends EventEmitter {
     tplink?: TpLinkConfig;
     tplinkDevice?: TpLinkDevice;
     status: boolean;
+    tags?: string[];
 
-    constructor({ name, id, loopback, tplink }: DeviceConstructor) {
+    constructor({ name, id, loopback, tplink, tags }: DeviceConstructor) {
         super();
 
         this.name = name;
         this.id = id;
         this.loopback = loopback;
         this.tplink = tplink;
+        this.tags = tags;
 
         if (tplink?.ipAddress) this.loadTplinkDevice();
     }
@@ -76,7 +79,8 @@ export class Device extends EventEmitter {
             name: this.name,
             id: this.id,
             status: updatedStatus,
-            updated: isUpdate
+            updated: isUpdate,
+            tags: this.tags
         });
     }
 
@@ -85,7 +89,8 @@ export class Device extends EventEmitter {
             name: this.name,
             id: this.id,
             status: updatedStatus,
-            updated: isUpdate
+            updated: isUpdate,
+            tags: this.tags
         };
 
         if (this.tplink?.propagate) {
