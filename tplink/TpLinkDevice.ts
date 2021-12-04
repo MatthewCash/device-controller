@@ -20,12 +20,21 @@ const decrypt = (buffer: Buffer, key = 0xab) => {
     return buffer;
 };
 
+export declare interface Device {
+    on(event: 'poll', listener: (status: boolean) => void);
+    on(event: 'update', listener: (update: boolean) => void);
+}
+
 export class TpLinkDevice extends EventEmitter {
     readonly ip: string;
+    pollInterval?: NodeJS.Timeout;
+    prevPowerState: boolean;
+
     constructor(ip: string) {
         super();
         this.ip = ip;
     }
+
     public static scan(broadcastAddr = '255.255.255.255') {
         const emitter = new EventEmitter();
         const client = dgram.createSocket({
@@ -43,6 +52,26 @@ export class TpLinkDevice extends EventEmitter {
             emitter.emit('new', device);
         });
         return emitter;
+    }
+
+    private async pollStatus() {
+        const status = await this.getStatus();
+
+        const online = status?.relay_state === 1;
+
+        this.emit('poll', online);
+        if (online !== this.prevPowerState) {
+            this.emit('update', online);
+            this.prevPowerState = online;
+        }
+    }
+
+    public startPolling() {
+        this.pollInterval = setInterval(() => this.pollStatus(), 100);
+    }
+
+    public stopPolling() {
+        clearInterval(this.pollInterval);
     }
 
     private async sendData(data): Promise<any> {
@@ -84,6 +113,7 @@ export class TpLinkDevice extends EventEmitter {
 
         return decodedData;
     }
+
     public async getStatus() {
         const data = await this.sendData({ system: { get_sysinfo: {} } });
         return data?.system?.get_sysinfo;
