@@ -18,7 +18,7 @@ export declare interface Device {
     on(
         event: 'update',
         listener: (update: InternalDeviceUpdateRequest) => void
-    ): this;
+    );
 }
 
 interface TpLinkConfig {
