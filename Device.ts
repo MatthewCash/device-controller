@@ -49,7 +49,12 @@ export class Device extends EventEmitter {
     }
 
     loadTplinkDevice() {
-        this.tplinkDevice = new TpLinkDevice(this.tplink.ipAddress);
+        this.tplinkDevice = new TpLinkDevice(
+            this.tplink?.ipAddress,
+            this.tplink?.monitor
+        );
+
+        this.tplinkDevice.on('update', this.updateStatus.bind(this));
     }
 
     toggleStatus() {

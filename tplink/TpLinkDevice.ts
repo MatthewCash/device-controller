@@ -30,9 +30,11 @@ export class TpLinkDevice extends EventEmitter {
     pollInterval?: NodeJS.Timeout;
     prevPowerState: boolean;
 
-    constructor(ip: string) {
+    constructor(ip: string, shouldPoll = false) {
         super();
         this.ip = ip;
+
+        if (shouldPoll) this.startPolling();
     }
 
     public static scan(broadcastAddr = '255.255.255.255') {
@@ -55,11 +57,13 @@ export class TpLinkDevice extends EventEmitter {
     }
 
     private async pollStatus() {
-        const status = await this.getStatus();
+        const status = await this.getStatus().catch(() => null);
+        if (status == null) return;
 
         const online = status?.relay_state === 1;
 
         this.emit('poll', online);
+
         if (online !== this.prevPowerState) {
             this.emit('update', online);
             this.prevPowerState = online;
