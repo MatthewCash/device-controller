@@ -44,6 +44,7 @@ export class Device extends EventEmitter {
         this.loopback = loopback;
         this.tplink = tplink;
         this.tags = tags;
+        this.status = false;
 
         if (tplink?.ipAddress) this.loadTplinkDevice();
     }
@@ -64,6 +65,7 @@ export class Device extends EventEmitter {
         this.updateStatus(!this.status);
     }
 
+    // Trigger a device update from status change
     updateStatus(newStatus: boolean) {
         const isUpdate = newStatus !== this.status;
 
@@ -82,6 +84,7 @@ export class Device extends EventEmitter {
         this.status = newStatus;
     }
 
+    // Notify clients device has been updated
     propagateUpdate(updatedStatus: boolean, isUpdate: boolean) {
         propagateDeviceUpdate({
             name: this.name,
@@ -92,8 +95,9 @@ export class Device extends EventEmitter {
         });
     }
 
+    // Notify controllers device should be updated
     propagateInternalUpdate(updatedStatus: boolean, isUpdate: boolean) {
-        const update = {
+        const update: InternalDeviceUpdateRequest = {
             name: this.name,
             id: this.id,
             status: updatedStatus,

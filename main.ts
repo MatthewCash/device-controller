@@ -45,20 +45,24 @@ config.devices.forEach(deviceConstructor => {
 export const updateDevice = (update: DeviceUpdateRequest) => {
     const device = devices.get(update?.id);
     if (!device) return;
+
     device.updateStatus(update.status);
 };
 
 export const updateDeviceInternal = (update: InternalDeviceUpdate) => {
     const device = devices.get(update?.id);
     if (!device) return;
+
     device.updateStatusInternal(update.status);
     propagateDeviceUpdate(update);
 };
 
+// Notify clients device has been updated
 export const propagateDeviceUpdate = (update: DeviceUpdate) => {
     propagateWebsocketUpdate(update);
 };
 
+// Notify controllers device should be updated
 export const propagateInternalDeviceUpdate = (
     update: InternalDeviceUpdateRequest
 ) => {
