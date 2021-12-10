@@ -20,7 +20,7 @@ const decrypt = (buffer: Buffer, key = 0xab) => {
     return buffer;
 };
 
-export declare interface Device {
+export declare interface TpLinkDevice {
     on(event: 'poll', listener: (status: boolean) => void);
     on(event: 'update', listener: (update: boolean) => void);
 }
