@@ -54,7 +54,10 @@ export class Device extends EventEmitter {
             this.tplink?.monitor
         );
 
-        this.tplinkDevice.on('update', this.updateStatus.bind(this));
+        this.tplinkDevice.on('update', newStatus => {
+            this.updateStatusInternal(newStatus);
+            this.propagateUpdate(newStatus, true);
+        });
     }
 
     toggleStatus() {
