@@ -1,11 +1,14 @@
+import { on } from 'events';
 import WebSocket from 'ws';
+import { verifyWsConnection, veryifyWsMessage } from '../auth';
 import { devices, DeviceUpdate, InternalDeviceUpdateRequest } from '../main';
 import { parseMessage } from './parser';
 
 let ws: WebSocket.Server;
 
-interface WebSocketClient extends WebSocket {
+interface DeviceClient extends WebSocket {
     alive?: boolean;
+    authorized: boolean;
 }
 
 export const startWebSocketServer = () => {
@@ -14,11 +17,41 @@ export const startWebSocketServer = () => {
 
     ws = new WebSocket.Server({ host, port });
 
-    ws.on('connection', (client: WebSocketClient, req) => {
-        client.on('message', data => onMessage(data, client));
+    ws.on('connection', async (client: DeviceClient, req) => {
+        client.authorized = await verifyWsConnection(req);
 
         client.alive = true;
         client.on('pong', () => (client.alive = true));
+
+        if (!client.authorized) {
+            await new Promise<void>(resolve => {
+                const onAuthMessage = async message => {
+                    client.authorized = await veryifyWsMessage(message).catch(
+                        () => false
+                    );
+                    if (client.authorized) {
+                        resolve();
+                        client.removeListener('message', onAuthMessage);
+
+                        client.send(
+                            JSON.stringify({
+                                authorized: true
+                            })
+                        );
+                    } else {
+                        client.send(
+                            JSON.stringify({
+                                authorized: false
+                            })
+                        );
+                    }
+                };
+
+                client.on('message', onAuthMessage);
+            });
+        }
+
+        client.on('message', data => onMessage(data, client));
 
         const deviceList = [...devices.values()].map(
             ({ id, name, status, tags }) => ({
@@ -47,7 +80,9 @@ export const startWebSocketServer = () => {
     console.log(`[Ready] WebSocket Server Listening on ws://${host}:${port}`);
 };
 
-const onMessage = (message: WebSocket.Data, client: WebSocket) => {
+const onMessage = (message: WebSocket.Data, client: DeviceClient) => {
+    if (!client.authorized) return;
+
     let data;
 
     try {
@@ -60,8 +95,9 @@ const onMessage = (message: WebSocket.Data, client: WebSocket) => {
 };
 
 export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
-    ws.clients.forEach(ws => {
-        ws.send(
+    ws.clients.forEach((client: DeviceClient) => {
+        if (!client.authorized) return;
+        client.send(
             JSON.stringify({
                 deviceUpdate: update
             })
@@ -72,8 +108,9 @@ export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
 export const propagateWebsocketInternalUpdate = (
     update: InternalDeviceUpdateRequest
 ) => {
-    ws.clients.forEach(ws => {
-        ws.send(
+    ws.clients.forEach((client: DeviceClient) => {
+        if (!client.authorized) return;
+        client.send(
             JSON.stringify({
                 internalDeviceUpdateRequest: update
             })
@@ -82,8 +119,8 @@ export const propagateWebsocketInternalUpdate = (
 };
 
 setInterval(() => {
-    ws?.clients?.forEach((client: WebSocketClient) => {
-        if (!client.alive) return client.terminate();
+    ws?.clients?.forEach((client: DeviceClient) => {
+        if (!client.alive) return client.close();
 
         client.alive = false;
         client.ping();

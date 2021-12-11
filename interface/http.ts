@@ -1,4 +1,5 @@
 import express from 'express';
+import { verifyHttpRequest } from '../auth';
 import { parseMessage } from './parser';
 
 const httpServer = express();
@@ -14,8 +15,10 @@ export const startHttpServer = () => {
     console.log(`[Ready] HTTP Server Listening on http://${host}:${port}`);
 };
 
-httpServer.post('*', (req, res) => {
-    const data = req.body;
+httpServer.post('*', async (req, res) => {
+    const authorized = await verifyHttpRequest(req);
 
-    parseMessage(data);
+    if (!authorized) return res.status(401).send('Unauthorized');
+
+    parseMessage(req.body);
 });
