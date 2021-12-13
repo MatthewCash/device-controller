@@ -1,7 +1,7 @@
 import config from './config.json';
 import { Request } from 'express';
 import { IncomingMessage } from 'http';
-import { RawData } from 'ws';
+import { WsMessage } from './interface/ws';
 
 const minTokenLength = 10;
 
@@ -32,14 +32,6 @@ export const verifyWsConnection = async (
     return verifyToken(token);
 };
 
-export const veryifyWsMessage = async (message: RawData) => {
-    let data;
-
-    try {
-        data = JSON.parse(message.toString());
-    } catch {
-        throw new Error('Invalid JSON');
-    }
-
-    return verifyToken(data?.authorization);
+export const veryifyWsMessage = async (data: WsMessage) => {
+    return verifyToken(data?.auth?.authorization);
 };

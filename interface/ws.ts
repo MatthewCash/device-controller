@@ -6,9 +6,13 @@ import { parseMessage } from './parser';
 
 let ws: WebSocket.Server;
 
-interface DeviceClient extends WebSocket {
+interface SocketStatus {
     alive?: boolean;
-    authorized: boolean;
+    authorized?: boolean;
+}
+
+interface DeviceClient extends WebSocket {
+    state: SocketStatus;
 }
 
 export const startWebSocketServer = () => {
@@ -18,72 +22,60 @@ export const startWebSocketServer = () => {
     ws = new WebSocket.Server({ host, port });
 
     ws.on('connection', async (client: DeviceClient, req) => {
-        client.authorized = await verifyWsConnection(req);
+        client.state = {
+            alive: true,
+            authorized: await verifyWsConnection(req)
+        };
 
-        client.alive = true;
-        client.on('pong', () => (client.alive = true));
+        client.send(JSON.stringify({ state: client.state }));
 
-        if (!client.authorized) {
-            await new Promise<void>(resolve => {
-                const onAuthMessage = async message => {
-                    client.authorized = await veryifyWsMessage(message).catch(
-                        () => false
-                    );
-                    if (client.authorized) {
-                        resolve();
-                        client.removeListener('message', onAuthMessage);
-
-                        client.send(
-                            JSON.stringify({
-                                authorized: true
-                            })
-                        );
-                    } else {
-                        client.send(
-                            JSON.stringify({
-                                authorized: false
-                            })
-                        );
-                    }
-                };
-
-                client.on('message', onAuthMessage);
-            });
-        }
+        client.on('pong', () => (client.state.alive = true));
 
         client.on('message', data => onMessage(data, client));
 
-        const deviceList = [...devices.values()].map(
-            ({ id, name, status, tags }) => ({
-                id,
-                name,
-                status,
-                tags
-            })
-        );
-
-        // Device List
-        client.send(JSON.stringify({ deviceList }));
-
-        const requiresStatus = deviceList.filter(
-            device => device.status !== null
-        );
-
-        // Request Unknown Statuses
-        client.send(
-            JSON.stringify({
-                requireStatus: requiresStatus.map(device => device.id)
-            })
-        );
+        if (client.state?.authorized) onAuthorized(client);
     });
 
     console.log(`[Ready] WebSocket Server Listening on ws://${host}:${port}`);
 };
 
-const onMessage = (message: WebSocket.Data, client: DeviceClient) => {
-    if (!client.authorized) return;
+const onAuthorized = (client: DeviceClient) => {
+    const deviceList = [...devices.values()].map(
+        ({ id, name, status, tags }) => ({
+            id,
+            name,
+            status,
+            tags
+        })
+    );
 
-    let data;
+    // Device List
+    client.send(JSON.stringify({ commands: { deviceList } }));
+
+    const requiresStatus = deviceList.filter(device => device.status !== null);
+
+    // Request Unknown Statuses
+    client.send(
+        JSON.stringify({
+            commands: {
+                requireStatus: requiresStatus.map(device => device.id)
+            }
+        })
+    );
+};
+
+interface Commands {
+    [name: string]: any;
+}
+export interface WsMessage {
+    commands?: Commands;
+    auth?: {
+        authorization?: string;
+    };
+}
+
+const onMessage = async (message: WebSocket.Data, client: DeviceClient) => {
+    let data: WsMessage;
 
     try {
         data = JSON.parse(message.toString());
@@ -91,15 +83,35 @@ const onMessage = (message: WebSocket.Data, client: DeviceClient) => {
         return client.send('Invalid JSON');
     }
 
-    parseMessage(data);
+    if (client.state?.authorized && data?.commands) {
+        parseMessage(data?.commands);
+    }
+
+    if (!client.state?.authorized) {
+        client.state.authorized = await veryifyWsMessage(data).catch(
+            () => false
+        );
+
+        client.send(
+            JSON.stringify({
+                state: {
+                    authorized: client.state?.authorized
+                }
+            })
+        );
+
+        if (client.state?.authorized) onAuthorized(client);
+    }
 };
 
 export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
     ws.clients.forEach((client: DeviceClient) => {
-        if (!client.authorized) return;
+        if (!client.state?.authorized) return;
         client.send(
             JSON.stringify({
-                deviceUpdate: update
+                commands: {
+                    deviceUpdate: update
+                }
             })
         );
     });
@@ -109,10 +121,12 @@ export const propagateWebsocketInternalUpdate = (
     update: InternalDeviceUpdateRequest
 ) => {
     ws.clients.forEach((client: DeviceClient) => {
-        if (!client.authorized) return;
+        if (!client.state?.authorized) return;
         client.send(
             JSON.stringify({
-                internalDeviceUpdateRequest: update
+                commands: {
+                    internalDeviceUpdateRequest: update
+                }
             })
         );
     });
@@ -120,9 +134,9 @@ export const propagateWebsocketInternalUpdate = (
 
 setInterval(() => {
     ws?.clients?.forEach((client: DeviceClient) => {
-        if (!client.alive) return client.close();
+        if (!client.state.alive) return client.close();
 
-        client.alive = false;
+        client.state.alive = false;
         client.ping();
     });
 }, 10000);
