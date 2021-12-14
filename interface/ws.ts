@@ -1,6 +1,12 @@
 import WebSocket from 'ws';
 import { verifyWsConnection, veryifyWsMessage } from '../auth';
-import { devices, DeviceUpdate, InternalDeviceUpdateRequest } from '../main';
+import {
+    devices,
+    DeviceUpdate,
+    DeviceUpdateRequest,
+    InternalDeviceUpdate,
+    InternalDeviceUpdateRequest
+} from '../main';
 import { parseMessage } from './parser';
 
 let ws: WebSocket.Server;
@@ -64,6 +70,9 @@ const onAuthorized = (client: DeviceClient) => {
 };
 
 interface Commands {
+    deviceUpdateRequest: DeviceUpdateRequest;
+    internalDeviceUpdate: InternalDeviceUpdate;
+    setScene: string | any;
     [name: string]: any;
 }
 export interface WsMessage {
