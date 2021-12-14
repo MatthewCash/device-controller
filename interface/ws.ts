@@ -1,4 +1,3 @@
-import { on } from 'events';
 import WebSocket from 'ws';
 import { verifyWsConnection, veryifyWsMessage } from '../auth';
 import { devices, DeviceUpdate, InternalDeviceUpdateRequest } from '../main';
