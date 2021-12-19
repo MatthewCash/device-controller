@@ -21,4 +21,8 @@ httpServer.post('*', async (req, res) => {
     if (!authorized) return res.status(401).send('Unauthorized');
 
     parseMessage(req.body);
+
+    res.status(200).send(
+        'Request Processed. No success/failure/error response is implemented currently'
+    );
 });
