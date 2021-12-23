@@ -70,12 +70,11 @@ const onAuthorized = (client: DeviceClient) => {
 };
 
 interface Commands {
-    deviceUpdateRequest: DeviceUpdateRequest;
-    internalDeviceUpdate: InternalDeviceUpdate;
-    setScene: string | any;
-    [name: string]: any;
+    deviceUpdateRequest?: DeviceUpdateRequest;
+    internalDeviceUpdate?: InternalDeviceUpdate;
+    setScene?: string | any;
 }
-export interface WsMessage {
+export interface SocketMessage {
     commands?: Commands;
     auth?: {
         authorization?: string;
@@ -83,7 +82,7 @@ export interface WsMessage {
 }
 
 const onMessage = async (message: WebSocket.Data, client: DeviceClient) => {
-    let data: WsMessage;
+    let data: SocketMessage;
 
     try {
         data = JSON.parse(message.toString());

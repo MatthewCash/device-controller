@@ -1,7 +1,7 @@
 import config from './config.json';
 import { Request } from 'express';
 import { IncomingMessage } from 'http';
-import { WsMessage } from './interface/ws';
+import { SocketMessage } from './interface/ws';
 
 const minTokenLength = 10;
 
@@ -32,6 +32,6 @@ export const verifyWsConnection = async (
     return verifyToken(token);
 };
 
-export const veryifyWsMessage = async (data: WsMessage) => {
+export const veryifyWsMessage = async (data: SocketMessage) => {
     return verifyToken(data?.auth?.authorization);
 };
