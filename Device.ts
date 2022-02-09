@@ -27,13 +27,19 @@ interface TpLinkConfig {
     monitor?: boolean;
 }
 
+export interface DeviceStatus {
+    online: boolean; // Device is reachable
+    state: boolean; // Controlled state
+    changingTo?: boolean; // Device changing state
+}
+
 export class Device extends EventEmitter {
     name: string;
     id: string;
     loopback?: boolean;
     tplink?: TpLinkConfig;
     tplinkDevice?: TpLinkDevice;
-    status: boolean;
+    status: DeviceStatus;
     tags?: string[];
 
     constructor({ name, id, loopback, tplink, tags }: DeviceConstructor) {
@@ -44,7 +50,11 @@ export class Device extends EventEmitter {
         this.loopback = loopback;
         this.tplink = tplink;
         this.tags = tags;
-        this.status = false;
+        this.status = {
+            online: false,
+            state: false,
+            changingTo: null
+        };
 
         if (tplink?.ipAddress) this.loadTplinkDevice();
     }
@@ -56,40 +66,44 @@ export class Device extends EventEmitter {
         );
 
         this.tplinkDevice.on('update', newStatus => {
-            this.updateStatusInternal(newStatus);
-            this.propagateUpdate(newStatus, true);
+            this.updateStateInternal(newStatus);
+            this.propagateUpdate(true);
         });
     }
 
-    toggleStatus() {
-        this.updateStatus(!this.status);
+    toggleState() {
+        this.requestStateUpdate(!this.status);
     }
 
     // Trigger a device update from status change
-    updateStatus(newStatus: boolean) {
-        const isUpdate = newStatus !== this.status;
+    requestStateUpdate(newState: boolean) {
+        const isUpdate = newState !== this.status.state;
 
         if (this.loopback) {
-            this.updateStatusInternal(newStatus);
+            this.updateStateInternal(newState);
 
-            this.propagateUpdate(newStatus, isUpdate);
+            this.propagateUpdate(isUpdate);
         }
 
-        this.propagateInternalUpdate(newStatus, isUpdate);
+        this.propagateInternalUpdate(newState, isUpdate);
     }
 
-    updateStatusInternal(newStatus: boolean) {
+    updateStateInternal(newStatus: boolean) {
         this.emit('update', newStatus);
 
-        this.status = newStatus;
+        this.status = {
+            online: true,
+            state: newStatus,
+            changingTo: null
+        };
     }
 
     // Notify clients device has been updated
-    propagateUpdate(updatedStatus: boolean, isUpdate: boolean) {
+    propagateUpdate(isUpdate: boolean) {
         propagateDeviceUpdate({
             name: this.name,
             id: this.id,
-            status: updatedStatus,
+            status: this.status,
             updated: isUpdate,
             tags: this.tags
         });
@@ -100,7 +114,7 @@ export class Device extends EventEmitter {
         const update: InternalDeviceUpdateRequest = {
             name: this.name,
             id: this.id,
-            status: updatedStatus,
+            requestedState: updatedStatus,
             updated: isUpdate,
             tags: this.tags
         };

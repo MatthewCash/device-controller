@@ -6,13 +6,15 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
         case 'off': {
             const computer = devices.get('computer');
 
-            computer.updateStatus(false);
+            computer.requestStateUpdate(false);
 
             await new Promise<void>(r =>
                 computer.once('update', status => status === false && r())
             );
 
-            [...devices.values()].forEach(device => device.updateStatus(false));
+            [...devices.values()].forEach(device =>
+                device.requestStateUpdate(false)
+            );
 
             axios
                 .post('http://127.0.0.1:1729/power', {
@@ -27,7 +29,9 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
         }
 
         case 'on': {
-            [...devices.values()].forEach(device => device.updateStatus(true));
+            [...devices.values()].forEach(device =>
+                device.requestStateUpdate(true)
+            );
 
             axios
                 .post('http://127.0.0.1:1729/white', {

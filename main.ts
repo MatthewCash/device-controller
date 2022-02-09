@@ -1,4 +1,4 @@
-import { Device } from './Device';
+import { Device, DeviceStatus } from './Device';
 import config from './config.json';
 import { startHttpServer } from './interface/http';
 import {
@@ -7,32 +7,36 @@ import {
     propagateWebsocketInternalUpdate
 } from './interface/ws';
 
+// Notify clients device has been updated
 export interface DeviceUpdate {
     name: Device['name'];
     id: Device['id'];
-    status: Device['status'];
+    status: DeviceStatus;
     updated?: boolean;
     tags?: Device['tags'];
 }
 
+// Client requests server to update device
 export interface DeviceUpdateRequest {
     name: Device['name'];
     id: Device['id'];
-    status: Device['status'];
+    requestedState: DeviceStatus['state'];
 }
 
+// Notify controllers device should be updated
 export interface InternalDeviceUpdateRequest {
     name: Device['name'];
     id: Device['id'];
-    status: Device['status'];
+    requestedState: DeviceStatus['state'];
     updated?: boolean;
     tags?: Device['tags'];
 }
 
+// Controller reports new device state
 export interface InternalDeviceUpdate {
     name: Device['name'];
     id: Device['id'];
-    status: Device['status'];
+    status: DeviceStatus;
 }
 
 export const devices = new Map<Device['id'], Device>();
@@ -46,14 +50,14 @@ export const updateDevice = (update: DeviceUpdateRequest) => {
     const device = devices.get(update?.id);
     if (!device) return;
 
-    device.updateStatus(update.status);
+    device.requestStateUpdate(update.requestedState);
 };
 
 export const updateDeviceInternal = (update: InternalDeviceUpdate) => {
     const device = devices.get(update?.id);
     if (!device) return;
 
-    device.updateStatusInternal(update.status);
+    device.updateStateInternal(update.status.state);
     propagateDeviceUpdate(update);
 };
 
