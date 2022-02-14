@@ -1,8 +1,10 @@
-import { EventEmitter } from 'stream';
+import { TypedEmitter } from 'tiny-typed-emitter';
+
 import {
+    DeviceUpdate,
     InternalDeviceUpdateRequest,
-    propagateDeviceUpdate,
-    propagateInternalDeviceUpdate
+    propagateUpdateToClients,
+    propogateUpdateToControllers
 } from './main';
 import { TpLinkDevice } from './tplink/TpLinkDevice';
 
@@ -14,11 +16,8 @@ interface DeviceConstructor {
     tags?: Device['tags'];
 }
 
-export declare interface Device {
-    on(
-        event: 'update',
-        listener: (update: InternalDeviceUpdateRequest) => void
-    );
+interface DeviceEvents {
+    update: (update: DeviceUpdate) => void;
 }
 
 interface TpLinkConfig {
@@ -33,7 +32,7 @@ export interface DeviceStatus {
     changingTo?: boolean; // Device changing state
 }
 
-export class Device extends EventEmitter {
+export class Device extends TypedEmitter<DeviceEvents> {
     name: string;
     id: string;
     loopback?: boolean;
@@ -67,7 +66,7 @@ export class Device extends EventEmitter {
 
         this.tplinkDevice.on('update', newStatus => {
             this.updateStateInternal(newStatus);
-            this.propagateUpdate(true);
+            this.propagateUpdateToClients(true);
         });
     }
 
@@ -82,35 +81,40 @@ export class Device extends EventEmitter {
         if (this.loopback) {
             this.updateStateInternal(newState);
 
-            this.propagateUpdate(isUpdate);
+            this.propagateUpdateToClients(isUpdate);
         }
 
-        this.propagateInternalUpdate(newState, isUpdate);
+        this.propagateUpdateToControllers(newState, isUpdate);
     }
 
-    updateStateInternal(newStatus: boolean) {
-        this.emit('update', newStatus);
-
+    // Change the device state on server
+    updateStateInternal(newState: boolean) {
         this.status = {
             online: true,
-            state: newStatus,
+            state: newState,
             changingTo: null
         };
+
+        this.propagateUpdateToClients(true);
     }
 
     // Notify clients device has been updated
-    propagateUpdate(isUpdate: boolean) {
-        propagateDeviceUpdate({
+    propagateUpdateToClients(isUpdate: boolean) {
+        const update: DeviceUpdate = {
             name: this.name,
             id: this.id,
             status: this.status,
             updated: isUpdate,
             tags: this.tags
-        });
+        };
+
+        this.emit('update', update);
+
+        propagateUpdateToClients(update);
     }
 
     // Notify controllers device should be updated
-    propagateInternalUpdate(updatedStatus: boolean, isUpdate: boolean) {
+    propagateUpdateToControllers(updatedStatus: boolean, isUpdate: boolean) {
         const update: InternalDeviceUpdateRequest = {
             name: this.name,
             id: this.id,
@@ -128,6 +132,6 @@ export class Device extends EventEmitter {
             });
         }
 
-        propagateInternalDeviceUpdate(update);
+        propogateUpdateToControllers(update);
     }
 }

@@ -58,16 +58,16 @@ export const updateDeviceInternal = (update: InternalDeviceUpdate) => {
     if (!device) return;
 
     device.updateStateInternal(update.status.state);
-    propagateDeviceUpdate(update);
+    propagateUpdateToClients(update);
 };
 
 // Notify clients device has been updated
-export const propagateDeviceUpdate = (update: DeviceUpdate) => {
+export const propagateUpdateToClients = (update: DeviceUpdate) => {
     propagateWebsocketUpdate(update);
 };
 
 // Notify controllers device should be updated
-export const propagateInternalDeviceUpdate = (
+export const propogateUpdateToControllers = (
     update: InternalDeviceUpdateRequest
 ) => {
     propagateWebsocketInternalUpdate(update);
