@@ -6,11 +6,15 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
         case 'off': {
             const computer = devices.get('computer');
 
-            computer.requestStateUpdate(false);
+            if (computer?.status.state) {
+                computer.requestStateUpdate(false);
 
-            await new Promise<void>(r =>
-                computer.once('update', status => status === false && r())
-            );
+                await new Promise<void>(r =>
+                    computer.once('update', update => {
+                        if (!update.status.state) r();
+                    })
+                );
+            }
 
             [...devices.values()].forEach(device =>
                 device.requestStateUpdate(false)
@@ -54,7 +58,7 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
 };
 
 export const toggleScene = () => {
-    const shouldTurnOff = devices.get('computer').status;
+    const shouldTurnOff = devices.get('computer')?.status?.state;
 
     setScene(shouldTurnOff ? 'off' : 'on');
 };
