@@ -50,7 +50,7 @@ const onAuthorized = (client: DeviceClient) => {
             id,
             name,
             status,
-            tags
+            tags: tags || []
         })
     );
 
