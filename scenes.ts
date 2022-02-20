@@ -39,7 +39,8 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
 
             axios
                 .post('http://127.0.0.1:1729/white', {
-                    cold: true
+                    cold: true,
+                    brightness: 100
                 })
                 .catch(error => {
                     console.warn(
