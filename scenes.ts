@@ -59,7 +59,9 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
 };
 
 export const toggleScene = () => {
-    const shouldTurnOff = devices.get('computer')?.status?.state;
+    // Turn on 5:00 - 18:00, off otherwise
+    const hour = new Date().getHours();
+    const shouldTurnOff = hour < 5 || hour > 18;
 
     setScene(shouldTurnOff ? 'off' : 'on');
 };
