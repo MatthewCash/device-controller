@@ -1,11 +1,8 @@
 import { Device, DeviceStatus } from './Device';
 import config from './config.json';
 import { startHttpServer } from './interface/http';
-import {
-    startWebSocketServer,
-    propagateWebsocketUpdate,
-    propagateWebsocketInternalUpdate
-} from './interface/ws';
+import { startWebSocketServer, propagateWebsocketUpdate } from './interface/ws';
+import { deviceControllers, loadDeviceControllers } from './controllers';
 
 // Notify clients device has been updated
 export interface DeviceUpdate {
@@ -41,9 +38,34 @@ export interface InternalDeviceUpdate {
 
 export const devices = new Map<Device['id'], Device>();
 
-config.devices.forEach(deviceConstructor => {
-    devices.set(deviceConstructor.id, new Device(deviceConstructor));
-    console.log(`Loaded device ${deviceConstructor.id}`);
+loadDeviceControllers().then(() => {
+    config.devices.forEach(deviceConstructor => {
+        const controllerConstructor = deviceControllers.get(
+            deviceConstructor?.controller?.id
+        );
+
+        if (!controllerConstructor) {
+            console.error(`Device ${deviceConstructor.id} has no controller`);
+        }
+
+        const controller = new controllerConstructor(
+            deviceConstructor?.controller?.config
+        );
+
+        const { name, id, tags } = deviceConstructor;
+
+        devices.set(
+            deviceConstructor.id,
+            new Device({
+                name,
+                id,
+                tags,
+                controller
+            })
+        );
+
+        console.log(`Loaded device ${deviceConstructor.id}`);
+    });
 });
 
 export const updateDevice = (update: DeviceUpdateRequest) => {
@@ -64,13 +86,6 @@ export const updateDeviceInternal = (update: InternalDeviceUpdate) => {
 // Notify clients device has been updated
 export const propagateUpdateToClients = (update: DeviceUpdate) => {
     propagateWebsocketUpdate(update);
-};
-
-// Notify controllers device should be updated
-export const propogateUpdateToControllers = (
-    update: InternalDeviceUpdateRequest
-) => {
-    propagateWebsocketInternalUpdate(update);
 };
 
 startWebSocketServer();
