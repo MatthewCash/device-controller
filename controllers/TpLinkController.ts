@@ -1,6 +1,10 @@
 import { TypedEmitter } from 'tiny-typed-emitter';
 
-import { DeviceController, DeviceControllerEvents } from '../DeviceController';
+import {
+    DeviceController,
+    DeviceControllerClass,
+    DeviceControllerEvents
+} from '../DeviceController';
 import { TpLinkDevice } from '../tplink/TpLinkDevice';
 
 interface TpLinkControllerConfig {
@@ -9,12 +13,12 @@ interface TpLinkControllerConfig {
     monitor?: boolean;
 }
 
-export const id = 'tp-link';
-
-class TpLinkController
+export const controller: DeviceControllerClass = class TpLinkController
     extends TypedEmitter<DeviceControllerEvents>
     implements DeviceController
 {
+    static readonly id = 'tplink';
+
     ipAddress: string;
     propagate: boolean;
     monitor: boolean;
@@ -52,6 +56,4 @@ class TpLinkController
 
         this.emit('update', state);
     }
-}
-
-export const controller = TpLinkController;
+};

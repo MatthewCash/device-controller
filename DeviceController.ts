@@ -1,15 +1,16 @@
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { Device, DeviceStatus } from './Device';
 
-interface DeviceControllerConfig {
+export interface DeviceControllerConfig {
     propagate?: boolean;
     monitor?: boolean;
     [key: string]: any;
 }
 
-export type DeviceControllerConstructor = new (
-    config: DeviceControllerConfig
-) => DeviceController;
+export interface DeviceControllerClass {
+    readonly id: string;
+    new (config: DeviceControllerConfig): DeviceController;
+}
 
 export interface DeviceControllerEvents {
     update: (state: boolean) => void;

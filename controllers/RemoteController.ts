@@ -1,7 +1,11 @@
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { Device } from '../Device';
 
-import { DeviceController, DeviceControllerEvents } from '../DeviceController';
+import {
+    DeviceController,
+    DeviceControllerClass,
+    DeviceControllerEvents
+} from '../DeviceController';
 import { propagateWebsocketInternalUpdate } from '../interface/ws';
 import { InternalDeviceUpdateRequest } from '../main';
 
@@ -10,12 +14,12 @@ interface RemoteControllerConfig {
     monitor?: boolean;
 }
 
-export const id = 'remote';
-
-class RemoteController
+export const controller: DeviceControllerClass = class RemoteController
     extends TypedEmitter<DeviceControllerEvents>
     implements DeviceController
 {
+    static readonly id = 'remote';
+
     propagate: boolean;
     monitor: boolean;
 
@@ -44,6 +48,4 @@ class RemoteController
 
         this.emit('update', state);
     }
-}
-
-export const controller = RemoteController;
+};

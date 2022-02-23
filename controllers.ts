@@ -1,17 +1,12 @@
 import path from 'path';
 
-import { DeviceControllerConstructor } from './DeviceController';
+import { DeviceControllerClass } from './DeviceController';
 import { readDirRecursive } from './util/readDirRecursive';
-
-interface DeviceControllerModule {
-    id: string;
-    controller: DeviceControllerConstructor;
-}
 
 const controllersDir = './controllers/';
 const controllersFileExtension = '.ts';
 
-export const deviceControllers = new Map<string, DeviceControllerConstructor>();
+export const deviceControllers = new Map<string, DeviceControllerClass>();
 
 export const loadDeviceControllers = async (): Promise<number> => {
     const files = await readDirRecursive(controllersDir);
@@ -24,13 +19,15 @@ export const loadDeviceControllers = async (): Promise<number> => {
     const loadPromises = controllerFiles.map(async file => {
         delete require.cache[require.resolve(file)];
 
-        const module = (await import(file)) as DeviceControllerModule;
+        const module = await import(file);
+        const controllerConstructor =
+            module.controller as DeviceControllerClass;
 
-        const { id, controller } = module;
+        const { id } = controllerConstructor;
 
-        if (typeof id !== 'string' || !controller) return null;
+        if (typeof id !== 'string' || !controllerConstructor) return null;
 
-        deviceControllers.set(id, controller);
+        deviceControllers.set(id, controllerConstructor);
     });
 
     if (!loadPromises.length) {

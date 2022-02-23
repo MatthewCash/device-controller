@@ -3,6 +3,10 @@ import config from './config.json';
 import { startHttpServer } from './interface/http';
 import { startWebSocketServer, propagateWebsocketUpdate } from './interface/ws';
 import { deviceControllers, loadDeviceControllers } from './controllers';
+import {
+    DeviceControllerConfig,
+    DeviceControllerClass
+} from './DeviceController';
 
 // Notify clients device has been updated
 export interface DeviceUpdate {
@@ -36,17 +40,31 @@ export interface InternalDeviceUpdate {
     status: DeviceStatus;
 }
 
+interface DeviceConfig {
+    name: Device['name'];
+    id: Device['id'];
+    controller: {
+        id: DeviceControllerClass['id'];
+        config?: DeviceControllerConfig;
+    };
+    tags?: Device['tags'];
+}
+
 export const devices = new Map<Device['id'], Device>();
 
-loadDeviceControllers().then(() => {
-    config.devices.forEach(deviceConstructor => {
-        const controllerConstructor = deviceControllers.get(
-            deviceConstructor?.controller?.id
-        );
+const loadDevices = (devicesConfig: DeviceConfig[]) => {
+    devicesConfig.forEach(deviceConstructor => {
+        const controllerId = deviceConstructor?.controller?.id;
 
-        if (!controllerConstructor) {
-            console.error(`Device ${deviceConstructor.id} has no controller`);
+        if (!controllerId) {
+            console.warn(
+                `Device ${deviceConstructor.id} has no specified controller, using loopback!`
+            );
         }
+
+        const controllerConstructor = deviceControllers.get(
+            controllerId ?? 'loopback'
+        );
 
         const controller = new controllerConstructor(
             deviceConstructor?.controller?.config
@@ -66,7 +84,7 @@ loadDeviceControllers().then(() => {
 
         console.log(`Loaded device ${deviceConstructor.id}`);
     });
-});
+};
 
 export const updateDevice = (update: DeviceUpdateRequest) => {
     const device = devices.get(update?.id);
@@ -88,5 +106,17 @@ export const propagateUpdateToClients = (update: DeviceUpdate) => {
     propagateWebsocketUpdate(update);
 };
 
-startWebSocketServer();
-startHttpServer();
+const main = async (...args: string[]) => {
+    console.log('Starting device-controller');
+
+    startWebSocketServer();
+    startHttpServer();
+
+    await loadDeviceControllers();
+
+    loadDevices(config.devices as DeviceConfig[]);
+};
+
+if (require.main === module) {
+    main(...process.argv.slice(2));
+}

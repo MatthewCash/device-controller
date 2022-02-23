@@ -1,18 +1,22 @@
 import { TypedEmitter } from 'tiny-typed-emitter';
 
-import { DeviceController, DeviceControllerEvents } from '../DeviceController';
+import {
+    DeviceController,
+    DeviceControllerClass,
+    DeviceControllerEvents
+} from '../DeviceController';
 
 interface LoopbackControllerConfig {
     propagate?: boolean;
     monitor?: boolean;
 }
 
-export const id = 'loopback';
-
-class LoopbackController
+export const controller: DeviceControllerClass = class LoopbackController
     extends TypedEmitter<DeviceControllerEvents>
     implements DeviceController
 {
+    static readonly id = 'loopback';
+
     propagate: boolean;
     monitor: boolean;
 
@@ -34,6 +38,4 @@ class LoopbackController
 
         this.emit('update', state);
     }
-}
-
-export const controller = LoopbackController;
+};

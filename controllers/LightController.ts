@@ -1,7 +1,11 @@
 import { WebSocket } from 'ws';
 import { TypedEmitter } from 'tiny-typed-emitter';
 
-import { DeviceController, DeviceControllerEvents } from '../DeviceController';
+import {
+    DeviceController,
+    DeviceControllerClass,
+    DeviceControllerEvents
+} from '../DeviceController';
 
 const lightControllerWsUrl =
     process.env.LIGHT_CONTROLLER_WS_URL || 'ws://localhost:1728';
@@ -10,13 +14,12 @@ interface LightControllerConfig {
     propagate?: boolean;
     monitor?: boolean;
 }
-
-export const id = 'light-controller';
-
-class LightController
+export const controller: DeviceControllerClass = class LightController
     extends TypedEmitter<DeviceControllerEvents>
     implements DeviceController
 {
+    static readonly id = 'light-controller';
+
     propagate: boolean;
     monitor: boolean;
 
@@ -111,6 +114,4 @@ class LightController
     static wsSendMessage(message: any): void {
         this.ws.send(JSON.stringify(message));
     }
-}
-
-export const controller = LightController;
+};

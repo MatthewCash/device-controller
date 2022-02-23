@@ -40,7 +40,9 @@ export class Device extends TypedEmitter<DeviceEvents> {
             changingTo: null
         };
 
-        this.controller?.on('update', this.updateStateInternal.bind(this));
+        if (this.controller?.monitor) {
+            this.controller?.on('update', this.updateStateInternal.bind(this));
+        }
     }
 
     // Trigger a device update from status change
