@@ -13,7 +13,7 @@ export interface DeviceControllerClass {
 }
 
 export interface DeviceControllerEvents {
-    update: (state: boolean) => void;
+    update: (state: DeviceStatus['state']) => void;
 }
 
 export abstract class DeviceController extends TypedEmitter<DeviceControllerEvents> {

@@ -1,5 +1,5 @@
 import { TypedEmitter } from 'tiny-typed-emitter';
-import { Device } from '../Device';
+import { Device, DeviceStatus } from '../Device';
 
 import {
     DeviceController,
@@ -30,7 +30,7 @@ export const controller: DeviceControllerClass = class RemoteController
         this.monitor = config?.monitor ?? true;
     }
 
-    updateState(state: boolean, device: Device): void {
+    updateState(state: DeviceStatus['state'], device: Device): void {
         if (!this.propagate) return;
 
         const update: InternalDeviceUpdateRequest = {
@@ -43,7 +43,7 @@ export const controller: DeviceControllerClass = class RemoteController
         propagateWebsocketInternalUpdate(update);
     }
 
-    private notifyState(state: boolean): void {
+    private notifyState(state: DeviceStatus['state']): void {
         if (!this.monitor) return;
 
         this.emit('update', state);

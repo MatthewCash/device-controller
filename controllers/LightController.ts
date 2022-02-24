@@ -6,6 +6,7 @@ import {
     DeviceControllerClass,
     DeviceControllerEvents
 } from '../DeviceController';
+import { DeviceStatus } from '../Device';
 
 const lightControllerWsUrl =
     process.env.LIGHT_CONTROLLER_WS_URL || 'ws://localhost:1728';
@@ -38,7 +39,7 @@ export const controller: DeviceControllerClass = class LightController
         LightController.instances.push(this);
     }
 
-    updateState(state: boolean): void {
+    updateState(state: DeviceStatus['state']): void {
         if (!this.propagate) return;
 
         LightController.wsSendMessage({
@@ -46,7 +47,7 @@ export const controller: DeviceControllerClass = class LightController
         });
     }
 
-    private notifyState(state: boolean): void {
+    private notifyState(state: DeviceStatus['state']): void {
         if (!this.monitor) return;
 
         this.emit('update', state);

@@ -1,4 +1,5 @@
 import { TypedEmitter } from 'tiny-typed-emitter';
+import { DeviceStatus } from '../Device';
 
 import {
     DeviceController,
@@ -40,7 +41,7 @@ export const controller: DeviceControllerClass = class TpLinkController
         }
     }
 
-    updateState(state: boolean): void {
+    updateState(state: DeviceStatus['state']): void {
         if (!this.propagate) return;
 
         this.tplinkDevice.setRelayPower(state).catch(error => {
@@ -51,7 +52,7 @@ export const controller: DeviceControllerClass = class TpLinkController
         });
     }
 
-    private notifyState(state: boolean): void {
+    private notifyState(state: DeviceStatus['state']): void {
         if (!this.monitor) return;
 
         this.emit('update', state);

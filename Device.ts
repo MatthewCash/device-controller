@@ -16,7 +16,7 @@ interface DeviceEvents {
 
 export interface DeviceStatus {
     online: boolean; // Device is reachable
-    state: boolean; // Controlled state
+    state: any; // Controlled state
     changingTo?: DeviceStatus['state']; // Device is changing to state
 }
 
@@ -46,14 +46,14 @@ export class Device extends TypedEmitter<DeviceEvents> {
     }
 
     // Trigger a device update from status change
-    requestStateUpdate(requestedState: boolean) {
+    requestStateUpdate(requestedState: DeviceStatus['state']) {
         if (this.controller?.propagate) {
             this.controller.updateState(requestedState, this);
         }
     }
 
     // Change the device state on server and notify clients
-    updateStateInternal(state: boolean) {
+    updateStateInternal(state: DeviceStatus['state']) {
         this.status = {
             online: true,
             state: state,

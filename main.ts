@@ -13,7 +13,6 @@ export interface DeviceUpdate {
     name: Device['name'];
     id: Device['id'];
     status: DeviceStatus;
-    updated?: boolean;
     tags?: Device['tags'];
 }
 
@@ -29,7 +28,6 @@ export interface InternalDeviceUpdateRequest {
     name: Device['name'];
     id: Device['id'];
     requestedState: DeviceStatus['state'];
-    updated?: boolean;
     tags?: Device['tags'];
 }
 
