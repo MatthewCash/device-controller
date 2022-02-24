@@ -20,15 +20,6 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
                 device.requestStateUpdate(false)
             );
 
-            axios
-                .post('http://127.0.0.1:1729/power', {
-                    power: false
-                })
-                .catch(error => {
-                    console.warn('An error occured while turning off lights!');
-                    console.error(error);
-                });
-
             return true;
         }
 
@@ -38,9 +29,12 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
             );
 
             axios
-                .post('http://127.0.0.1:1729/white', {
-                    cold: true,
-                    brightness: 100
+                .post('http://127.0.0.1:1729/update', {
+                    update: {
+                        power: true,
+                        colorTemp: 9000,
+                        brightness: 100
+                    }
                 })
                 .catch(error => {
                     console.warn(
