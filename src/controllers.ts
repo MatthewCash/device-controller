@@ -3,7 +3,7 @@ import path from 'path';
 import { DeviceControllerClass } from './DeviceController';
 import { readDirRecursive } from './util/readDirRecursive';
 
-const controllersDir = './controllers/';
+const controllersDir = './src/controllers/';
 const controllersFileExtension = '.ts';
 
 export const deviceControllers = new Map<string, DeviceControllerClass>();
@@ -20,14 +20,13 @@ export const loadDeviceControllers = async (): Promise<number> => {
         delete require.cache[require.resolve(file)];
 
         const module = await import(file);
-        const controllerConstructor =
-            module.controller as DeviceControllerClass;
+        const controllerClass = module.controller as DeviceControllerClass;
 
-        const { id } = controllerConstructor;
+        const { id } = controllerClass;
 
-        if (typeof id !== 'string' || !controllerConstructor) return null;
+        if (typeof id !== 'string' || !controllerClass) return null;
 
-        deviceControllers.set(id, controllerConstructor);
+        deviceControllers.set(id, controllerClass);
     });
 
     if (!loadPromises.length) {

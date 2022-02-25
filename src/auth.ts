@@ -1,4 +1,4 @@
-import config from './config.json';
+import config from '../config.json';
 import { Request } from 'express';
 import { IncomingMessage } from 'http';
 import { SocketMessage } from './interface/ws';

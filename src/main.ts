@@ -1,5 +1,5 @@
 import { Device, DeviceStatus } from './Device';
-import config from './config.json';
+import config from '../config.json';
 import { startHttpServer } from './interface/http';
 import { startWebSocketServer, propagateWebsocketUpdate } from './interface/ws';
 import { deviceControllers, loadDeviceControllers } from './controllers';
