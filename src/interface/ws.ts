@@ -74,20 +74,40 @@ interface Commands {
     internalDeviceUpdate?: InternalDeviceUpdate;
     setScene?: string | any;
 }
-export interface SocketMessage {
+export interface InboundSocketMessage {
     commands?: Commands;
     auth?: {
         authorization?: string;
     };
+    connection?: {
+        pong?: true;
+    };
+}
+
+export interface OutboundSocketMessage {
+    commands?: Commands;
+    auth?: {
+        authorization?: string;
+    };
+    state?: {
+        authorized?: boolean;
+    };
+    connection?: {
+        ping?: true;
+    };
 }
 
 const onMessage = async (message: WebSocket.Data, client: DeviceClient) => {
-    let data: SocketMessage;
+    let data: InboundSocketMessage;
 
     try {
         data = JSON.parse(message.toString());
     } catch {
         return client.send('Invalid JSON');
+    }
+
+    if (data.connection?.pong === true) {
+        client.state.alive = true;
     }
 
     if (client.state?.authorized && data?.commands) {
@@ -144,6 +164,8 @@ setInterval(() => {
         if (!client.state.alive) return client.close();
 
         client.state.alive = false;
+
+        client.send(JSON.stringify({ connection: { ping: true } }));
         client.ping();
     });
-}, 10000);
+}, 3000);
