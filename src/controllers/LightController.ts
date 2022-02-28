@@ -43,7 +43,7 @@ export const controller: DeviceControllerClass = class LightController
         if (!this.propagate) return;
 
         LightController.wsSendMessage({
-            setPower: state
+            update: { power: state }
         });
     }
 
