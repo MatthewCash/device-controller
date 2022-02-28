@@ -23,21 +23,6 @@ export interface DeviceUpdateRequest {
     requestedState: DeviceStatus['state'];
 }
 
-// Notify controllers device should be updated
-export interface InternalDeviceUpdateRequest {
-    name: Device['name'];
-    id: Device['id'];
-    requestedState: DeviceStatus['state'];
-    tags?: Device['tags'];
-}
-
-// Controller reports new device state
-export interface InternalDeviceUpdate {
-    name: Device['name'];
-    id: Device['id'];
-    status: DeviceStatus;
-}
-
 interface DeviceConfig {
     name: Device['name'];
     id: Device['id'];
@@ -89,14 +74,6 @@ export const updateDevice = (update: DeviceUpdateRequest) => {
     if (!device) return;
 
     device.requestStateUpdate(update.requestedState);
-};
-
-export const updateDeviceInternal = (update: InternalDeviceUpdate) => {
-    const device = devices.get(update?.id);
-    if (!device) return;
-
-    device.updateStateInternal(update.status.state);
-    propagateUpdateToClients(update);
 };
 
 // Notify clients device has been updated

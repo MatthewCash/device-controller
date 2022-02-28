@@ -1,9 +1,4 @@
-import {
-    DeviceUpdateRequest,
-    InternalDeviceUpdate,
-    updateDevice,
-    updateDeviceInternal
-} from '../main';
+import { DeviceUpdateRequest, updateDevice } from '../main';
 import { setScene, toggleScene } from '../scenes';
 
 interface MessageHandlers {
@@ -13,9 +8,6 @@ interface MessageHandlers {
 const messageHandlers: MessageHandlers = {
     deviceUpdateRequest: (update: DeviceUpdateRequest) => {
         updateDevice(update);
-    },
-    internalDeviceUpdate: (update: InternalDeviceUpdate) => {
-        updateDeviceInternal(update);
     },
     setScene: async (scene?: string) => {
         if (typeof scene === 'string') {

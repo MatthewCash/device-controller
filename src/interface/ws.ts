@@ -1,12 +1,6 @@
 import WebSocket from 'ws';
 import { verifyWsConnection, veryifyWsMessage } from '../auth';
-import {
-    devices,
-    DeviceUpdate,
-    DeviceUpdateRequest,
-    InternalDeviceUpdate,
-    InternalDeviceUpdateRequest
-} from '../main';
+import { devices, DeviceUpdate, DeviceUpdateRequest } from '../main';
 import { parseMessage } from './parser';
 
 let ws: WebSocket.Server;
@@ -71,7 +65,6 @@ const onAuthorized = (client: DeviceClient) => {
 
 interface Commands {
     deviceUpdateRequest?: DeviceUpdateRequest;
-    internalDeviceUpdate?: InternalDeviceUpdate;
     setScene?: string | any;
 }
 export interface InboundSocketMessage {
@@ -138,21 +131,6 @@ export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
             JSON.stringify({
                 commands: {
                     deviceUpdate: update
-                }
-            })
-        );
-    });
-};
-
-export const propagateWebsocketInternalUpdate = (
-    update: InternalDeviceUpdateRequest
-) => {
-    ws.clients.forEach((client: DeviceClient) => {
-        if (!client.state?.authorized) return;
-        client.send(
-            JSON.stringify({
-                commands: {
-                    internalDeviceUpdateRequest: update
                 }
             })
         );

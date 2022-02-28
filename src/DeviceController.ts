@@ -14,6 +14,7 @@ export interface DeviceControllerClass {
 
 export interface DeviceControllerEvents {
     update: (state: DeviceStatus['state']) => void;
+    statusUpdate: (state: DeviceStatus) => void;
 }
 
 export abstract class DeviceController extends TypedEmitter<DeviceControllerEvents> {
