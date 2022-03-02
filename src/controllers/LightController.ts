@@ -43,14 +43,14 @@ export const controller: DeviceControllerClass = class LightController
         if (!this.propagate) return;
 
         LightController.wsSendMessage({
-            update: { power: state }
+            update: state
         });
     }
 
     private notifyState(state: DeviceStatus['state']): void {
         if (!this.monitor) return;
 
-        this.emit('update', state);
+        this.emit('update', { power: state });
     }
 
     static startWebSocketConnection(): void {

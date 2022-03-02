@@ -39,14 +39,7 @@ export const startWebSocketServer = () => {
 };
 
 const onAuthorized = (client: DeviceClient) => {
-    const deviceList = [...devices.values()].map(
-        ({ id, name, status, tags }) => ({
-            id,
-            name,
-            status,
-            tags: tags || []
-        })
-    );
+    const deviceList = [...devices.values()].map(device => device.serialize());
 
     // Device List
     client.send(JSON.stringify({ commands: { deviceList } }));

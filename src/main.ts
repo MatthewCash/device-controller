@@ -14,6 +14,7 @@ export interface DeviceUpdate {
     id: Device['id'];
     status: DeviceStatus;
     tags?: Device['tags'];
+    capabilities?: Device['capabilities'];
 }
 
 // Client requests server to update device
@@ -31,6 +32,7 @@ interface DeviceConfig {
         config?: DeviceControllerConfig;
     };
     tags?: Device['tags'];
+    capabilities?: Device['capabilities'];
 }
 
 export const devices = new Map<Device['id'], Device>();
@@ -53,7 +55,7 @@ const loadDevices = (devicesConfig: DeviceConfig[]) => {
             deviceConstructor?.controller?.config
         );
 
-        const { name, id, tags } = deviceConstructor;
+        const { name, id, tags, capabilities } = deviceConstructor;
 
         devices.set(
             deviceConstructor.id,
@@ -61,6 +63,7 @@ const loadDevices = (devicesConfig: DeviceConfig[]) => {
                 name,
                 id,
                 tags,
+                capabilities,
                 controller
             })
         );

@@ -65,7 +65,7 @@ export class TpLinkDevice extends EventEmitter {
         this.emit('poll', online);
 
         if (online !== this.prevPowerState) {
-            this.emit('update', online);
+            this.emit('update', { power: online });
             this.prevPowerState = online;
         }
     }

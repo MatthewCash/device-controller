@@ -44,7 +44,9 @@ export const controller: DeviceControllerClass = class TpLinkController
     updateState(state: DeviceStatus['state']): void {
         if (!this.propagate) return;
 
-        this.tplinkDevice.setRelayPower(state).catch(error => {
+        if (state?.power == null) return;
+
+        this.tplinkDevice.setRelayPower(state.power).catch(error => {
             console.warn(
                 'An error occured while propagating TP-Link device update:'
             );

@@ -8,6 +8,7 @@ interface DeviceConstructor {
     id: Device['id'];
     controller?: DeviceController;
     tags?: Device['tags'];
+    capabilities?: Device['capabilities'];
 }
 
 interface DeviceEvents {
@@ -20,20 +21,37 @@ export interface DeviceStatus {
     changingTo?: DeviceStatus['state']; // Device is changing to state
 }
 
+interface SerializedDevice {
+    name: Device['name'];
+    id: Device['id'];
+    tags?: Device['tags'];
+    capabilities?: Device['capabilities'];
+    status: DeviceStatus;
+}
+
 export class Device extends TypedEmitter<DeviceEvents> {
     name: string;
     id: string;
     controller?: DeviceController;
     status: DeviceStatus;
     tags?: string[];
+    capabilities?: string[];
 
-    constructor({ name, id, controller, tags }: DeviceConstructor) {
+    constructor({
+        name,
+        id,
+        controller,
+        tags,
+        capabilities
+    }: DeviceConstructor) {
         super();
 
         this.name = name;
         this.id = id;
         this.controller = controller;
-        this.tags = tags;
+        this.tags = tags ?? [];
+        this.capabilities = capabilities ?? [];
+
         this.status = {
             online: false,
             state: false,
@@ -47,6 +65,16 @@ export class Device extends TypedEmitter<DeviceEvents> {
                 this.updateStatusInternal.bind(this)
             );
         }
+    }
+
+    serialize(): SerializedDevice {
+        return {
+            name: this.name,
+            id: this.id,
+            tags: this.tags,
+            capabilities: this.capabilities,
+            status: this.status
+        };
     }
 
     // Trigger a device update from status change

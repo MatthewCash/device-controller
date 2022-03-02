@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers/promises';
 import axios from 'axios';
 import { devices } from './main';
 
@@ -6,27 +7,30 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
         case 'off': {
             const computer = devices.get('computer');
 
-            if (computer?.status.state) {
-                computer.requestStateUpdate(false);
+            if (computer?.status.state?.power) {
+                computer.requestStateUpdate({ power: false });
 
-                await new Promise<void>(r =>
-                    computer.once('update', update => {
-                        if (!update.status.state) r();
-                    })
-                );
+                await Promise.race([
+                    new Promise<void>(r =>
+                        computer.once('update', update => {
+                            if (!update.status.state?.power) r();
+                        })
+                    ),
+                    setTimeout(60000)
+                ]);
             }
 
-            [...devices.values()].forEach(device =>
-                device.requestStateUpdate(false)
-            );
+            [...devices.values()]
+                .filter(device => device.capabilities.includes('bool-switch'))
+                .forEach(device => device.requestStateUpdate({ power: false }));
 
             return true;
         }
 
         case 'on': {
-            [...devices.values()].forEach(device =>
-                device.requestStateUpdate(true)
-            );
+            [...devices.values()]
+                .filter(device => device.capabilities.includes('bool-switch'))
+                .forEach(device => device.requestStateUpdate({ power: true }));
 
             axios
                 .post('http://127.0.0.1:1729/update', {
