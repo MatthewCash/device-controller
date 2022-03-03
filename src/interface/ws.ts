@@ -43,17 +43,6 @@ const onAuthorized = (client: DeviceClient) => {
 
     // Device List
     client.send(JSON.stringify({ commands: { deviceList } }));
-
-    const requiresStatus = deviceList.filter(device => device.status !== null);
-
-    // Request Unknown Statuses
-    client.send(
-        JSON.stringify({
-            commands: {
-                requireStatus: requiresStatus.map(device => device.id)
-            }
-        })
-    );
 };
 
 interface InboundCommands {
