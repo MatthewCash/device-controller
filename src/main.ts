@@ -7,6 +7,7 @@ import {
     DeviceControllerConfig,
     DeviceControllerClass
 } from './DeviceController';
+import { TpLinkBulbGroup } from './tplink/TpLinkBulbGroup';
 
 // Notify clients device has been updated
 export interface DeviceUpdate {
@@ -86,6 +87,8 @@ export const propagateUpdateToClients = (update: DeviceUpdate) => {
 
 const main = async (...args: string[]) => {
     console.log('Starting device-controller');
+
+    TpLinkBulbGroup.loadLightingEffects();
 
     startWebSocketServer();
     startHttpServer();

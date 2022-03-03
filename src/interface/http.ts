@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyHttpRequest } from '../auth';
-import { parseMessage } from './parser';
+import { parseCommands } from './parser';
 
 const httpServer = express();
 
@@ -20,7 +20,7 @@ httpServer.post('*', async (req, res) => {
 
     if (!authorized) return res.status(401).send('Unauthorized');
 
-    parseMessage(req.body);
+    parseCommands(req.body);
 
     res.status(200).send(
         'Request Processed. No success/failure/error response is implemented currently'

@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import { verifyWsConnection, veryifyWsMessage } from '../auth';
 import { devices, DeviceUpdate, DeviceUpdateRequest } from '../main';
-import { parseMessage } from './parser';
+import { parseCommands } from './parser';
 
 let ws: WebSocket.Server;
 
@@ -56,12 +56,18 @@ const onAuthorized = (client: DeviceClient) => {
     );
 };
 
-interface Commands {
+interface InboundCommands {
     deviceUpdateRequest?: DeviceUpdateRequest;
     setScene?: string | any;
+    reloadLightingEffects?: boolean;
 }
+
+interface OutboundCommands {
+    deviceUpdate?: DeviceUpdate;
+}
+
 export interface InboundSocketMessage {
-    commands?: Commands;
+    commands?: InboundCommands;
     auth?: {
         authorization?: string;
     };
@@ -71,7 +77,7 @@ export interface InboundSocketMessage {
 }
 
 export interface OutboundSocketMessage {
-    commands?: Commands;
+    commands?: OutboundCommands;
     auth?: {
         authorization?: string;
     };
@@ -97,7 +103,7 @@ const onMessage = async (message: WebSocket.Data, client: DeviceClient) => {
     }
 
     if (client.state?.authorized && data?.commands) {
-        parseMessage(data?.commands);
+        parseCommands(data?.commands);
     }
 
     if (!client.state?.authorized) {

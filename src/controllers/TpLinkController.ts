@@ -6,7 +6,7 @@ import {
     DeviceControllerClass,
     DeviceControllerEvents
 } from '../DeviceController';
-import { TpLinkDevice } from '../tplink/TpLinkDevice';
+import { TpLinkSwitch } from '../tplink/TpLinkSwitch';
 
 interface TpLinkControllerConfig {
     ipAddress: string;
@@ -24,7 +24,10 @@ export const controller: DeviceControllerClass = class TpLinkController
     propagate: boolean;
     monitor: boolean;
 
-    private tplinkDevice: TpLinkDevice;
+    private tplinkSwitch: TpLinkSwitch;
+    private pollInterval: NodeJS.Timer;
+
+    private lastState: any;
 
     constructor(config: TpLinkControllerConfig) {
         super();
@@ -34,10 +37,25 @@ export const controller: DeviceControllerClass = class TpLinkController
         this.propagate = config?.propagate ?? true;
         this.monitor = config?.monitor ?? true;
 
-        this.tplinkDevice = new TpLinkDevice(this.ipAddress, this.monitor);
+        this.tplinkSwitch = new TpLinkSwitch(this.ipAddress);
 
         if (this.monitor) {
-            this.tplinkDevice.on('update', this.notifyState.bind(this));
+            this.pollInterval = setInterval(async () => {
+                const state = await this.tplinkSwitch.poll().catch(() => null);
+                if (!state) return;
+
+                if (
+                    this.lastState &&
+                    Object.keys(state).every(
+                        key => state[key] === this.lastState[key]
+                    )
+                )
+                    return;
+
+                this.lastState = state;
+
+                this.notifyState(state);
+            }, 100);
         }
     }
 
@@ -46,7 +64,7 @@ export const controller: DeviceControllerClass = class TpLinkController
 
         if (state?.power == null) return;
 
-        this.tplinkDevice.setRelayPower(state.power).catch(error => {
+        this.tplinkSwitch.setRelayPower(state.power).catch(error => {
             console.warn(
                 'An error occured while propagating TP-Link device update:'
             );

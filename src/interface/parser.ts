@@ -1,11 +1,13 @@
 import { DeviceUpdateRequest, updateDevice } from '../main';
 import { setScene, toggleScene } from '../scenes';
+import { TpLinkBulbGroup } from '../tplink/TpLinkBulbGroup';
+import { InboundSocketMessage } from './ws';
 
-interface MessageHandlers {
+interface CommandHandlers {
     [key: string]: (data, message) => void;
 }
 
-const messageHandlers: MessageHandlers = {
+const commandHandlers: CommandHandlers = {
     deviceUpdateRequest: (update: DeviceUpdateRequest) => {
         updateDevice(update);
     },
@@ -16,11 +18,14 @@ const messageHandlers: MessageHandlers = {
         } else {
             toggleScene();
         }
+    },
+    reloadLightingEffects: () => {
+        TpLinkBulbGroup.loadLightingEffects();
     }
 };
 
-export const parseMessage = message => {
-    Object.keys(message).forEach(key => {
-        messageHandlers[key]?.(message[key], message);
+export const parseCommands = (commands: InboundSocketMessage['commands']) => {
+    Object.keys(commands).forEach(key => {
+        commandHandlers[key]?.(commands[key], commands);
     });
 };
