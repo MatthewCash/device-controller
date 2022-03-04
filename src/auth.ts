@@ -5,16 +5,18 @@ import { InboundSocketMessage } from './interface/ws';
 
 const minTokenLength = 10;
 
-const tokens: string[] = Object.values(config?.tokens);
+const tokens: string[] = config?.tokens;
 
 const verifyToken = async (token?: string): Promise<boolean> => {
     if (token?.length < minTokenLength) return false;
 
-    if (token === config?.tokens?.testing) {
+    if (!tokens.includes(token)) return false;
+
+    if (token.startsWith('testing')) {
         console.warn('Testing token used!');
     }
 
-    return tokens.includes(token);
+    return true;
 };
 
 export const verifyHttpRequest = async (req: Request): Promise<boolean> => {
