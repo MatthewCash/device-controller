@@ -1,5 +1,4 @@
 import { setTimeout } from 'timers/promises';
-import axios from 'axios';
 import { devices } from './main';
 
 export const setScene = async (sceneName: string): Promise<boolean> => {
@@ -32,20 +31,11 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
                 .filter(device => device.capabilities.includes('bool-switch'))
                 .forEach(device => device.requestStateUpdate({ power: true }));
 
-            axios
-                .post('http://127.0.0.1:1729/update', {
-                    update: {
-                        power: true,
-                        colorTemp: 9000,
-                        brightness: 100
-                    }
-                })
-                .catch(error => {
-                    console.warn(
-                        'An error occured while setting lights to white!'
-                    );
-                    console.error(error);
-                });
+            devices.get('lights').requestStateUpdate({
+                power: true,
+                colorTemp: 9000,
+                brightness: 100
+            });
 
             return true;
         }
