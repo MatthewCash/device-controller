@@ -85,13 +85,15 @@ export class TpLinkBulbGroup {
         )
             this.disableLightingEffect();
 
-        if (updateData?.effectId) {
+        if (updateData?.hasOwnProperty('effectId')) {
             const id = updateData?.effectId;
             const effect = TpLinkBulbGroup.lightingEffects.get(id);
 
-            if (!effect) throw new Error(`Could not find effect ${id}!`);
-
-            this.enableLightingEffect(effect);
+            if (effect) {
+                this.enableLightingEffect(effect);
+            } else {
+                this.disableLightingEffect();
+            }
         }
 
         await Promise.all(
