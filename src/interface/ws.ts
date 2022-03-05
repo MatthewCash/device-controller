@@ -113,7 +113,7 @@ const onMessage = async (message: WebSocket.Data, client: DeviceClient) => {
 };
 
 export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
-    ws.clients.forEach((client: DeviceClient) => {
+    (ws.clients as unknown as DeviceClient[]).forEach(client => {
         if (!client.state?.authorized) return;
         client.send(
             JSON.stringify({
@@ -126,7 +126,7 @@ export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
 };
 
 setInterval(() => {
-    ws?.clients?.forEach((client: DeviceClient) => {
+    (ws?.clients as unknown as DeviceClient[])?.forEach(client => {
         if (!client.state.alive) return client.close();
 
         client.state.alive = false;

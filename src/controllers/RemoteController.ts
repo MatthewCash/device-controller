@@ -5,6 +5,7 @@ import { Device, DeviceStatus } from '../Device';
 import {
     DeviceController,
     DeviceControllerClass,
+    DeviceControllerConfig,
     DeviceControllerEvents
 } from '../DeviceController';
 
@@ -49,9 +50,7 @@ interface OutboundSocketMessage {
     errors?: any[];
 }
 
-interface RemoteControllerConfig {
-    propagate?: boolean;
-    monitor?: boolean;
+interface RemoteControllerConfig extends DeviceControllerConfig {
     deviceId: string;
     address: string;
     tokens: {

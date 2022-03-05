@@ -4,14 +4,13 @@ import { TypedEmitter } from 'tiny-typed-emitter';
 import {
     DeviceController,
     DeviceControllerClass,
+    DeviceControllerConfig,
     DeviceControllerEvents
 } from '../DeviceController';
 import { LightingUpdateData, LightState } from '../tplink/TpLinkBulb';
 import { TpLinkBulbGroup } from '../tplink/TpLinkBulbGroup';
 
-interface LightControllerConfig {
-    propagate?: boolean;
-    monitor?: boolean;
+interface LightControllerConfig extends DeviceControllerConfig {
     bulbIps: string[];
 }
 

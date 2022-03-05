@@ -2,14 +2,13 @@ import { TypedEmitter } from 'tiny-typed-emitter';
 import { Device, DeviceStatus } from './Device';
 
 export interface DeviceControllerConfig {
-    propagate?: boolean;
-    monitor?: boolean;
-    [key: string]: any;
+    propagate: boolean;
+    monitor: boolean;
 }
 
 export interface DeviceControllerClass {
     readonly id: string;
-    new (config: DeviceControllerConfig): DeviceController;
+    new (config: DeviceControllerConfig & any): DeviceController;
 }
 
 export interface DeviceControllerEvents {

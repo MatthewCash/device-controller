@@ -95,7 +95,7 @@ const main = async (...args: string[]) => {
 
     await loadDeviceControllers();
 
-    loadDevices(config.devices as DeviceConfig[]);
+    loadDevices(config.devices as unknown as DeviceConfig[]);
 };
 
 if (require.main === module) {

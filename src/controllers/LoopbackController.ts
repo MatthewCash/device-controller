@@ -4,13 +4,11 @@ import { DeviceStatus } from '../Device';
 import {
     DeviceController,
     DeviceControllerClass,
+    DeviceControllerConfig,
     DeviceControllerEvents
 } from '../DeviceController';
 
-interface LoopbackControllerConfig {
-    propagate?: boolean;
-    monitor?: boolean;
-}
+interface LoopbackControllerConfig extends DeviceControllerConfig {}
 
 export const controller: DeviceControllerClass = class LoopbackController
     extends TypedEmitter<DeviceControllerEvents>

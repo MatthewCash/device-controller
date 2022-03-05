@@ -4,14 +4,13 @@ import { DeviceStatus } from '../Device';
 import {
     DeviceController,
     DeviceControllerClass,
+    DeviceControllerConfig,
     DeviceControllerEvents
 } from '../DeviceController';
 import { TpLinkSwitch } from '../tplink/TpLinkSwitch';
 
-interface TpLinkControllerConfig {
+interface TpLinkControllerConfig extends DeviceControllerConfig {
     ipAddress: string;
-    propagate?: boolean;
-    monitor?: boolean;
 }
 
 export const controller: DeviceControllerClass = class TpLinkController
