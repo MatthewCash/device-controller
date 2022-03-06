@@ -22,8 +22,6 @@ const tplinkDecrypt = (buffer: Buffer, key = 0xab) => {
 export abstract class TpLinkDevice {
     readonly ip: string;
 
-    private lastReceivedMessage: string;
-
     constructor(ip: string) {
         this.ip = ip;
     }
@@ -50,7 +48,6 @@ export abstract class TpLinkDevice {
 
                 try {
                     const decryptedData = tplinkDecrypt(message).toString();
-                    this.lastReceivedMessage = decryptedData;
 
                     data = JSON.parse(decryptedData);
                 } catch {

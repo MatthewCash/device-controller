@@ -38,13 +38,13 @@ interface DeviceConfig {
 
 export const devices = new Map<Device['id'], Device>();
 
-const loadDevices = (devicesConfig: DeviceConfig[]) => {
-    devicesConfig.forEach(deviceConstructor => {
-        const controllerId = deviceConstructor?.controller?.id;
+const loadDevices = (devicesConfigs: DeviceConfig[]) => {
+    devicesConfigs.forEach(deviceConfig => {
+        const controllerId = deviceConfig?.controller?.id;
 
         if (!controllerId) {
             console.warn(
-                `Device ${deviceConstructor.id} has no specified controller, using loopback!`
+                `Device ${deviceConfig.id} has no specified controller, using loopback!`
             );
         }
 
@@ -53,13 +53,13 @@ const loadDevices = (devicesConfig: DeviceConfig[]) => {
         );
 
         const controller = new controllerConstructor(
-            deviceConstructor?.controller?.config
+            deviceConfig?.controller?.config
         );
 
-        const { name, id, tags, capabilities } = deviceConstructor;
+        const { name, id, tags, capabilities } = deviceConfig;
 
         devices.set(
-            deviceConstructor.id,
+            deviceConfig.id,
             new Device({
                 name,
                 id,
@@ -69,7 +69,7 @@ const loadDevices = (devicesConfig: DeviceConfig[]) => {
             })
         );
 
-        console.log(`Loaded device ${deviceConstructor.id}`);
+        console.log(`Loaded device ${deviceConfig.id}`);
     });
 };
 

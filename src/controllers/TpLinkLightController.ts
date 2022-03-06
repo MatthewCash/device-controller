@@ -10,15 +10,15 @@ import {
 import { LightingUpdateData, LightState } from '../tplink/TpLinkBulb';
 import { TpLinkBulbGroup } from '../tplink/TpLinkBulbGroup';
 
-interface LightControllerConfig extends DeviceControllerConfig {
+interface TpLinkLightControllerConfig extends DeviceControllerConfig {
     bulbIps: string[];
 }
 
-export const controller: DeviceControllerClass = class LightController
+export const controller: DeviceControllerClass = class TpLinkLightController
     extends TypedEmitter<DeviceControllerEvents>
     implements DeviceController
 {
-    static readonly id = 'light-controller';
+    static readonly id = 'tplink-lights';
 
     propagate: boolean;
     monitor: boolean;
@@ -30,7 +30,7 @@ export const controller: DeviceControllerClass = class LightController
 
     private lastState: any;
 
-    constructor(config: LightControllerConfig) {
+    constructor(config: TpLinkLightControllerConfig) {
         super();
 
         this.propagate = config?.propagate ?? true;

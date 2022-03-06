@@ -9,15 +9,15 @@ import {
 } from '../DeviceController';
 import { TpLinkSwitch } from '../tplink/TpLinkSwitch';
 
-interface TpLinkControllerConfig extends DeviceControllerConfig {
+interface TpLinkSwitchControllerConfig extends DeviceControllerConfig {
     ipAddress: string;
 }
 
-export const controller: DeviceControllerClass = class TpLinkController
+export const controller: DeviceControllerClass = class TpLinkSwitchController
     extends TypedEmitter<DeviceControllerEvents>
     implements DeviceController
 {
-    static readonly id = 'tplink';
+    static readonly id = 'tplink-switch';
 
     ipAddress: string;
     propagate: boolean;
@@ -28,7 +28,7 @@ export const controller: DeviceControllerClass = class TpLinkController
 
     private lastState: any;
 
-    constructor(config: TpLinkControllerConfig) {
+    constructor(config: TpLinkSwitchControllerConfig) {
         super();
 
         this.ipAddress = config?.ipAddress;
@@ -65,7 +65,7 @@ export const controller: DeviceControllerClass = class TpLinkController
 
         this.tplinkSwitch.setRelayPower(state.power).catch(error => {
             console.warn(
-                'An error occured while propagating TP-Link device update:'
+                'An error occured while propagating TP-Link Switch device update for ${}:'
             );
             console.error(error);
         });

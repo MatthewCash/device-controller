@@ -33,7 +33,7 @@ export interface LightingGroupUpdateData extends LightingUpdateData {
 }
 
 export class TpLinkBulbGroup {
-    readonly ipAddresses;
+    readonly ipAddresses: string[];
 
     static lightingEffects = new Map<LightingEffect['id'], LightingEffect>();
     public currentEffectId?: string;
