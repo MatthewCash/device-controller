@@ -65,7 +65,7 @@ export const controller: DeviceControllerClass = class TpLinkSwitchController
 
         this.tplinkSwitch.setRelayPower(state.power).catch(error => {
             console.warn(
-                'An error occured while propagating TP-Link Switch device update for ${}:'
+                'An error occured while propagating TP-Link device update:'
             );
             console.error(error);
         });
