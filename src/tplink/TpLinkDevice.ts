@@ -36,8 +36,11 @@ export abstract class TpLinkDevice {
             });
 
             const timeout = setTimeout(() => {
-                socket.close();
-                reject(new Error('Request Timed Out!'));
+                try {
+                    socket.close();
+                } finally {
+                    reject(new Error('Request Timed Out!'));
+                }
             }, 100);
 
             socket.on('message', message => {
@@ -61,6 +64,10 @@ export abstract class TpLinkDevice {
                 clearTimeout(timeout);
                 socket.close();
                 reject(error);
+            });
+
+            socket.once('close', () => {
+                clearTimeout(timeout);
             });
 
             const message = tplinkEncrypt(JSON.stringify(data));
