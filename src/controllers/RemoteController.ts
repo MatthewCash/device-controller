@@ -126,7 +126,7 @@ export const controller: DeviceControllerClass = class RemoteController
     private connectToWebSocket() {
         console.log('Devices Connecting to Remote controller...');
 
-        this.ws?.close();
+        if (this.ws?.readyState !== WebSocket.CLOSED) this.ws?.close();
 
         this.wsAlive = false;
         this.wsAuthorized = false;
