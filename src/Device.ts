@@ -54,7 +54,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
         this.status = {
             online: false,
-            state: false,
+            state: null,
             changingTo: null
         };
 
