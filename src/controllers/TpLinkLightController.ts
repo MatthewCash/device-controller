@@ -1,4 +1,3 @@
-import dgram from 'dgram';
 import { TypedEmitter } from 'tiny-typed-emitter';
 
 import {
