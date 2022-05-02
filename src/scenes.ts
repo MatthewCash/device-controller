@@ -6,6 +6,11 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
         case 'off': {
             const computer = devices.get('computer');
 
+            devices.get('lights').requestStateUpdate({
+                power: false,
+                transitionSpeed: 10000
+            });
+
             if (computer?.status.state?.power) {
                 computer.requestStateUpdate({ power: false });
 
