@@ -7,6 +7,7 @@ export const setScene = async (sceneName: string): Promise<boolean> => {
             const computer = devices.get('computer');
 
             devices.get('lights').requestStateUpdate({
+                effectId: null,
                 power: false,
                 transitionSpeed: 10000
             });
