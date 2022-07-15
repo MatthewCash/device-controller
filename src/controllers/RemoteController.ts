@@ -124,8 +124,6 @@ export const controller: DeviceControllerClass = class RemoteController
     }
 
     private connectToWebSocket() {
-        console.log('Devices Connecting to Remote controller...');
-
         if (this.ws?.readyState !== WebSocket.CLOSED) this.ws?.close();
 
         this.wsAlive = false;
@@ -139,7 +137,7 @@ export const controller: DeviceControllerClass = class RemoteController
     }
 
     private wsOnConnect(): void {
-        console.log('Remote Controller WebSocket Connected!');
+        console.log(`Remote Controller connected to ${this.address} for "${this.deviceId}"`);
 
         this.wsSendMessage({
             commands: [
@@ -221,11 +219,12 @@ export const controller: DeviceControllerClass = class RemoteController
     }
 
     private wsOnClose(): void {
-        console.log('Remote Controller WebSocket Disconnected!');
+        console.warn(`Remote Controller disconnected from ${this.address}!`)
     }
 
     private wsOnError(error: Error): void {
-        console.warn(error);
+        console.warn(`Remote Controller disconnected from ${this.address}!:`);
+        console.error(error);
     }
 
     private wsSendMessage(message: OutboundSocketMessage): void {
