@@ -8,6 +8,7 @@ import {
     DeviceControllerClass
 } from './DeviceController';
 import { TpLinkBulbGroup } from './tplink/TpLinkBulbGroup';
+import { loadScenes } from './scenes';
 
 // Notify clients device has been updated
 export interface DeviceUpdate {
@@ -94,10 +95,9 @@ const main = async (...args: string[]) => {
     startHttpServer();
 
     await loadDeviceControllers();
+    await loadScenes();
 
     loadDevices(config.devices as unknown as DeviceConfig[]);
 };
 
-if (require.main === module) {
-    main(...process.argv.slice(2));
-}
+if (require.main === module) main(...process.argv.slice(2));

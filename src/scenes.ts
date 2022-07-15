@@ -1,56 +1,47 @@
-import { setTimeout } from 'timers/promises';
-import { devices } from './main';
+import path from 'path';
 
-export const setScene = async (sceneName: string): Promise<boolean> => {
-    switch (sceneName) {
-        case 'off': {
-            const computer = devices.get('computer');
+import { readDirRecursive } from './util/readDirRecursive';
 
-            devices.get('lights').requestStateUpdate({
-                effectId: null,
-                power: false,
-                transitionSpeed: 10000
-            });
+const scenesDir = './src/scenes/';
+const scenesFileExtension = '.ts';
 
-            if (computer?.status.state?.power) {
-                computer.requestStateUpdate({ power: false });
+type SceneExecutor = () => Promise<void>;
+const sceneExecutors = new Map<string, SceneExecutor>();
 
-                await Promise.race([
-                    new Promise<void>(r =>
-                        computer.once('update', update => {
-                            if (!update.status.state?.power) r();
-                        })
-                    ),
-                    setTimeout(60000)
-                ]);
-            }
+export const loadScenes = async (): Promise<number> => {
+    const files = await readDirRecursive(scenesDir);
+    const sceneFiles = files.filter(
+        file => path.extname(file) === scenesFileExtension
+    );
 
-            [...devices.values()]
-                .filter(device => device.capabilities.includes('bool-switch'))
-                .forEach(device => device.requestStateUpdate({ power: false }));
+    sceneExecutors.clear();
 
-            return true;
-        }
+    const loadPromises = sceneFiles.map(async file => {
+        delete require.cache[require.resolve(file)];
 
-        case 'on': {
-            [...devices.values()]
-                .filter(device => device.capabilities.includes('bool-switch'))
-                .forEach(device => device.requestStateUpdate({ power: true }));
+        const sceneName = path.basename(file);
 
-            devices.get('lights').requestStateUpdate({
-                power: true,
-                colorTemp: 9000,
-                brightness: 100
-            });
+        const module = await import(file);
+        const sceneExecutor = module.run as SceneExecutor;
 
-            return true;
-        }
+        sceneExecutors.set(sceneName, sceneExecutor);
+    });
 
-        default: {
-            return false;
-        }
+    if (!loadPromises.length) {
+        console.warn('No valid scenes in ' + scenesDir);
+        return 0;
     }
+
+    await Promise.all(loadPromises);
+
+    console.log(
+        `[+] ${sceneExecutors.size}/${sceneFiles.length} scenes loaded!`
+    );
+
+    return sceneExecutors.size;
 };
+
+export const setScene = (sceneName: string) => sceneExecutors.get(sceneName)();
 
 export const toggleScene = () => {
     // Turn on 5:00 - 18:00, off otherwise
