@@ -19,7 +19,7 @@ export const loadScenes = async (): Promise<number> => {
     const loadPromises = sceneFiles.map(async file => {
         delete require.cache[require.resolve(file)];
 
-        const sceneName = path.basename(file);
+        const sceneName = path.parse(file).name;
 
         const module = await import(file);
         const sceneExecutor = module.run as SceneExecutor;
@@ -41,7 +41,7 @@ export const loadScenes = async (): Promise<number> => {
     return sceneExecutors.size;
 };
 
-export const setScene = (sceneName: string) => sceneExecutors.get(sceneName)();
+export const setScene = (sceneName: string): boolean => !!sceneExecutors.get(sceneName)?.();
 
 export const toggleScene = () => {
     // Turn on 5:00 - 18:00, off otherwise
