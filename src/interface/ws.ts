@@ -127,7 +127,7 @@ export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
 
 setInterval(() => {
     (ws?.clients as unknown as DeviceClient[])?.forEach(client => {
-        if (!client.state.alive) return client.close();
+        if (!client?.state?.alive) return client.close();
 
         client.state.alive = false;
 
