@@ -3,7 +3,7 @@ import path from 'path';
 import { readDirRecursive } from './util/readDirRecursive';
 
 const scenesDir = './src/scenes/';
-const scenesFileExtension = '.ts';
+const scenesFileExtension = process[Symbol.for('ts-node.register.instance')] ? '.ts' : '.js';
 
 type SceneExecutor = () => Promise<void>;
 const sceneExecutors = new Map<string, SceneExecutor>();
