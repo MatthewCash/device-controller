@@ -1,4 +1,4 @@
-import { LightingEffect } from '../src/tplink/TpLinkBulbGroup';
+import { LightingEffect } from '../tplink/TpLinkBulbGroup';
 
 export const effect: LightingEffect = {
     interval: 10,

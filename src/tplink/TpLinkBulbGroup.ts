@@ -3,8 +3,8 @@ import path from 'path';
 import { readDirRecursive } from '../util/readDirRecursive';
 import { LightingUpdateData, LightState, TpLinkBulb } from './TpLinkBulb';
 
-const effectsDir = './effects/';
-const effectsFileExtension = '.ts';
+const effectsDir = './src/effects/';
+const effectsFileExtension = process[Symbol.for('ts-node.register.instance')] ? '.ts' : '.js';
 
 export interface LightingEffect {
     interval: number;
