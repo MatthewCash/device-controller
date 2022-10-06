@@ -4,7 +4,8 @@ import { DeviceControllerClass } from './DeviceController';
 import { readDirRecursive } from './util/readDirRecursive';
 
 const controllersDir = './src/controllers/';
-const controllersFileExtension = '.ts';
+
+const controllersFileExtension = process[Symbol.for('ts-node.register.instance')] ? '.ts' : '.js';
 
 export const deviceControllers = new Map<string, DeviceControllerClass>();
 

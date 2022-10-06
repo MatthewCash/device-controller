@@ -1,5 +1,4 @@
 import { Device, DeviceStatus } from './Device';
-import config from '../config.json';
 import { startHttpServer } from './interface/http';
 import { startWebSocketServer, propagateWebsocketUpdate } from './interface/ws';
 import { deviceControllers, loadDeviceControllers } from './controllers';
@@ -9,6 +8,7 @@ import {
 } from './DeviceController';
 import { TpLinkBulbGroup } from './tplink/TpLinkBulbGroup';
 import { loadScenes } from './scenes';
+import { getConfig, loadConfig } from './config';
 
 // Notify clients device has been updated
 export interface DeviceUpdate {
@@ -89,6 +89,8 @@ export const propagateUpdateToClients = (update: DeviceUpdate) => {
 const main = async (...args: string[]) => {
     console.log('Starting device-controller');
 
+    await loadConfig();
+
     TpLinkBulbGroup.loadLightingEffects();
 
     startWebSocketServer();
@@ -97,7 +99,7 @@ const main = async (...args: string[]) => {
     await loadDeviceControllers();
     await loadScenes();
 
-    loadDevices(config.devices as unknown as DeviceConfig[]);
+    loadDevices((await getConfig()).devices as unknown as DeviceConfig[]);
 };
 
 if (require.main === module) main(...process.argv.slice(2));
