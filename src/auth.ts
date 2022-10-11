@@ -1,13 +1,12 @@
-import config from '../config.json';
 import { Request } from 'express';
 import { IncomingMessage } from 'http';
 import { setTimeout } from 'timers/promises';
 
 import { InboundSocketMessage } from './interface/ws';
+import { getConfig } from './config';
 
 const minTokenLength = 10;
 
-const tokens: string[] = config?.tokens;
 const throttledIps = new Map<string, Date>();
 
 const verifyToken = async (
@@ -18,6 +17,8 @@ const verifyToken = async (
         await setTimeout(1000); // Should help prevent clients from spamming requests
         return false;
     }
+
+    const tokens = (await getConfig()).tokens;
 
     if (token?.length < minTokenLength || !tokens.includes(token)) {
         throttledIps.set(ipAddress, new Date());
