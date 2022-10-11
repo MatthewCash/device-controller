@@ -1,16 +1,28 @@
 import config from '../config.json';
 import { Request } from 'express';
 import { IncomingMessage } from 'http';
+import { setTimeout } from 'timers/promises';
+
 import { InboundSocketMessage } from './interface/ws';
 
 const minTokenLength = 10;
 
 const tokens: string[] = config?.tokens;
+const throttledIps = new Map<string, Date>();
 
-const verifyToken = async (token?: string): Promise<boolean> => {
-    if (token?.length < minTokenLength) return false;
+const verifyToken = async (
+    token: string,
+    ipAddress?: string
+): Promise<boolean> => {
+    if (throttledIps.get(ipAddress)?.getTime() + 1000 > Date.now()) {
+        await setTimeout(1000); // Should help prevent clients from spamming requests
+        return false;
+    }
 
-    if (!tokens.includes(token)) return false;
+    if (token?.length < minTokenLength || !tokens.includes(token)) {
+        throttledIps.set(ipAddress, new Date());
+        return false;
+    }
 
     if (token.startsWith('testing')) {
         console.warn('Testing token used!');
