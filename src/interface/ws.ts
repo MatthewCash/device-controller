@@ -16,7 +16,7 @@ interface DeviceClient extends WebSocket {
 
 export const startWebSocketServer = () => {
     const host = process.env.WS_HOST || '0.0.0.0';
-    const port = Number(process.env.WS_PORT) || 3001;
+    const port = Number(process.env.WS_PORT) || 8081;
 
     ws = new WebSocket.Server({ host, port });
 
