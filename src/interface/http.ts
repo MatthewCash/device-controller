@@ -8,7 +8,7 @@ httpServer.use(express.json());
 
 export const startHttpServer = () => {
     const host = process.env.HTTP_HOST || '0.0.0.0';
-    const port = Number(process.env.HTTP_PORT) || 3000;
+    const port = Number(process.env.HTTP_PORT) || 8080;
 
     httpServer.listen(port, host);
 
