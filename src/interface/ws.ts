@@ -3,14 +3,14 @@ import { verifyWsConnection, veryifyWsMessage } from '../auth';
 import { devices, DeviceUpdate, DeviceUpdateRequest } from '../main';
 import { parseCommands } from './parser';
 
-let ws: WebSocket.Server;
+let ws: WebSocket.Server<DeviceControllerSocketClient>;
 
 interface SocketStatus {
     alive?: boolean;
     authorized?: boolean;
 }
 
-interface DeviceClient extends WebSocket {
+interface DeviceControllerSocketClient extends WebSocket {
     state: SocketStatus;
 }
 
@@ -20,7 +20,7 @@ export const startWebSocketServer = () => {
 
     ws = new WebSocket.Server({ host, port });
 
-    ws.on('connection', async (client: DeviceClient, req) => {
+    ws.on('connection', async (client, req) => {
         client.state = {
             alive: true,
             authorized: await verifyWsConnection(req)
@@ -38,7 +38,7 @@ export const startWebSocketServer = () => {
     console.log(`[Ready] WebSocket Server Listening on ws://${host}:${port}`);
 };
 
-const onAuthorized = (client: DeviceClient) => {
+const onAuthorized = client => {
     const deviceList = [...devices.values()].map(device => device.serialize());
 
     // Device List
@@ -78,7 +78,10 @@ export interface OutboundSocketMessage {
     };
 }
 
-const onMessage = async (message: WebSocket.Data, client: DeviceClient) => {
+const onMessage = async (
+    message: WebSocket.Data,
+    client: DeviceControllerSocketClient
+) => {
     let data: InboundSocketMessage;
 
     try {
@@ -113,7 +116,7 @@ const onMessage = async (message: WebSocket.Data, client: DeviceClient) => {
 };
 
 export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
-    (ws.clients as unknown as DeviceClient[]).forEach(client => {
+    ws?.clients?.forEach(client => {
         if (!client.state?.authorized) return;
         client.send(
             JSON.stringify({
@@ -126,7 +129,7 @@ export const propagateWebsocketUpdate = (update: DeviceUpdate) => {
 };
 
 setInterval(() => {
-    (ws?.clients as unknown as DeviceClient[])?.forEach(client => {
+    ws?.clients?.forEach(client => {
         if (!client?.state?.alive) return client.close();
 
         client.state.alive = false;
