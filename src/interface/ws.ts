@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { verifyWsConnection, veryifyWsMessage } from '../auth';
+import { verifyWsConnection, verifyWsMessage } from '../auth';
 import { devices, DeviceUpdate, DeviceUpdateRequest } from '../main';
 import { parseCommands } from './parser';
 
@@ -99,7 +99,7 @@ const onMessage = async (
     }
 
     if (!client.state?.authorized) {
-        client.state.authorized = await veryifyWsMessage(data).catch(
+        client.state.authorized = await verifyWsMessage(data).catch(
             () => false
         );
 

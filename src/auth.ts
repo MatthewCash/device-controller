@@ -51,6 +51,6 @@ export const verifyWsConnection = async (
     return verifyToken(token);
 };
 
-export const veryifyWsMessage = async (data: InboundSocketMessage) => {
+export const verifyWsMessage = async (data: InboundSocketMessage) => {
     return verifyToken(data?.auth?.authorization);
 };
