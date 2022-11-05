@@ -44,9 +44,9 @@ export const loadScenes = async (): Promise<number> => {
 export const setScene = (sceneName: string): boolean => !!sceneExecutors.get(sceneName)?.();
 
 export const toggleScene = () => {
-    // Turn on 5:00 - 18:00, off otherwise
+    // Turn on 12:00 (UTC) 5:00 (PST) - 1:00 (UTC) 18:00 (PST), off otherwise
     const hour = new Date().getHours();
-    const shouldTurnOff = hour < 5 || hour > 18;
+    const shouldTurnOff = hour < 1 || hour < 12;
 
     setScene(shouldTurnOff ? 'off' : 'on');
 };
