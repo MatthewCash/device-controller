@@ -2,7 +2,10 @@ import { Request } from 'express';
 import { IncomingMessage } from 'http';
 import { setTimeout } from 'timers/promises';
 
-import { InboundSocketMessage } from './interface/ws';
+import {
+    DeviceControllerSocketClient,
+    InboundSocketMessage
+} from './interface/ws';
 import { getConfig } from './config';
 
 const minTokenLength = 10;
@@ -38,7 +41,9 @@ export const verifyHttpRequest = async (req: Request): Promise<boolean> => {
     token ??= req?.headers?.authorization;
     token ??= req?.body?.authorization;
 
-    return verifyToken(token);
+    const ipAddress = (req.headers['x-real-ip'] as string) || req.ip;
+
+    return verifyToken(token, ipAddress);
 };
 
 export const verifyWsConnection = async (
@@ -48,9 +53,15 @@ export const verifyWsConnection = async (
 
     token ??= req?.headers?.authorization;
 
-    return verifyToken(token);
+    const ipAddress =
+        (req.headers['x-real-ip'] as string) || req.socket.remoteAddress;
+
+    return verifyToken(token, ipAddress);
 };
 
-export const verifyWsMessage = async (data: InboundSocketMessage) => {
-    return verifyToken(data?.auth?.authorization);
+export const verifyWsMessage = async (
+    data: InboundSocketMessage,
+    client: DeviceControllerSocketClient
+) => {
+    return verifyToken(data?.auth?.authorization, client.ipAddress);
 };

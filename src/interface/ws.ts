@@ -1,4 +1,5 @@
 import WebSocket from 'ws';
+
 import { verifyWsConnection, verifyWsMessage } from '../auth';
 import { devices, DeviceUpdate, DeviceUpdateRequest } from '../main';
 import { parseCommands } from './parser';
@@ -10,8 +11,9 @@ interface SocketStatus {
     authorized?: boolean;
 }
 
-interface DeviceControllerSocketClient extends WebSocket {
+export interface DeviceControllerSocketClient extends WebSocket {
     state: SocketStatus;
+    ipAddress: string;
 }
 
 export const startWebSocketServer = () => {
@@ -21,6 +23,9 @@ export const startWebSocketServer = () => {
     ws = new WebSocket.Server({ host, port });
 
     ws.on('connection', async (client, req) => {
+        client.ipAddress =
+            (req.headers['x-real-ip'] as string) || req.socket.remoteAddress;
+
         client.state = {
             alive: true,
             authorized: await verifyWsConnection(req)
@@ -99,7 +104,7 @@ const onMessage = async (
     }
 
     if (!client.state?.authorized) {
-        client.state.authorized = await verifyWsMessage(data).catch(
+        client.state.authorized = await verifyWsMessage(data, client).catch(
             () => false
         );
 
