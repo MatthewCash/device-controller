@@ -13,4 +13,4 @@ FROM gcr.io/distroless/nodejs:16
 COPY --from=build /app /app
 WORKDIR /app
 
-CMD ["src/main.js"]
+CMD ["--use-openssl-ca", "src/main.js"]

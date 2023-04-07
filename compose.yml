@@ -11,3 +11,4 @@ services:
             - CONFIG_FILE_PATH=/data/config.json
         volumes:
             - ./config.json:/data/config.json:ro
+            - /etc/ssl/certs:/etc/ssl/certs
