@@ -1,4 +1,4 @@
-FROM node:16-slim AS build
+FROM node:18-slim AS build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY src src
 COPY tsconfig.json .
 RUN npx tsc
 
-FROM gcr.io/distroless/nodejs:16
+FROM gcr.io/distroless/nodejs:18
 COPY --from=build /app /app
 WORKDIR /app
 
