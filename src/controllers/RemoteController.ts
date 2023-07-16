@@ -137,8 +137,6 @@ export const controller: DeviceControllerClass = class RemoteController
     }
 
     private wsOnConnect(): void {
-        console.log(`Remote Controller connected to ${this.address} for "${this.deviceId}"`);
-
         this.wsSendMessage({
             commands: [
                 {
@@ -154,6 +152,9 @@ export const controller: DeviceControllerClass = class RemoteController
     }
 
     private wsOnAuthorized() {
+        console.log(
+            `Remote Controller connected and authorized with ${this.address} for "${this.deviceId}"`
+        );
         this.wsSendMessage({
             commands: [
                 {
