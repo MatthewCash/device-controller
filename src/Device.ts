@@ -61,6 +61,10 @@ export class Device extends TypedEmitter<DeviceEvents> {
         if (this.controller?.monitor) {
             this.controller?.on('update', this.updateStateInternal.bind(this));
             this.controller?.on(
+                'onlineUpdate',
+                this.updateOnlineInternal.bind(this)
+            );
+            this.controller?.on(
                 'statusUpdate',
                 this.updateStatusInternal.bind(this)
             );
@@ -88,7 +92,26 @@ export class Device extends TypedEmitter<DeviceEvents> {
     updateStateInternal(state: DeviceStatus['state']) {
         this.status = {
             online: true,
-            state: state,
+            state,
+            changingTo: null
+        };
+
+        const update: DeviceUpdate = {
+            name: this.name,
+            id: this.id,
+            status: this.status,
+            tags: this.tags
+        };
+
+        this.emit('update', update);
+
+        propagateUpdateToClients(update);
+    }
+
+    updateOnlineInternal(online: DeviceStatus['online']) {
+        this.status = {
+            online,
+            state: online ? this.status.state : null,
             changingTo: null
         };
 

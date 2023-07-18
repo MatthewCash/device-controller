@@ -8,6 +8,7 @@ import {
 } from '../DeviceController';
 import { LightingUpdateData, LightState } from '../tplink/TpLinkBulb';
 import { TpLinkBulbGroup } from '../tplink/TpLinkBulbGroup';
+import { DeviceStatus } from '../Device';
 
 interface TpLinkLightControllerConfig extends DeviceControllerConfig {
     bulbIps: string[];
@@ -28,6 +29,7 @@ export const controller: DeviceControllerClass = class TpLinkLightController
     private pollInverval: NodeJS.Timer;
 
     private lastState: any;
+    private failureCount = 0;
 
     constructor(config: TpLinkLightControllerConfig) {
         super();
@@ -43,9 +45,10 @@ export const controller: DeviceControllerClass = class TpLinkLightController
                 const state = await this.tplinkBulbGroup
                     .poll()
                     .catch(() => null);
-                if (!state) return;
 
                 if (
+                    state != null &&
+                    typeof state === 'object' &&
                     this.lastState &&
                     Object.keys(state).every(
                         key =>
@@ -57,7 +60,22 @@ export const controller: DeviceControllerClass = class TpLinkLightController
 
                 this.lastState = state;
 
-                this.notifyState(state);
+                if (state != null) {
+                    this.failureCount = 0;
+                    this.notifyState(state);
+                } else {
+                    this.failureCount++;
+                    if (this.failureCount === 50) {
+                        console.warn(
+                            `Bulbs ${this.bulbIps.join(
+                                ','
+                            )} are offline after ${
+                                this.failureCount
+                            } poll failures!`
+                        );
+                        this.notifyOnline(false);
+                    }
+                }
             }, 100);
         }
     }
@@ -77,5 +95,11 @@ export const controller: DeviceControllerClass = class TpLinkLightController
         if (!this.monitor) return;
 
         this.emit('update', state);
+    }
+
+    private notifyOnline(online: DeviceStatus['online']): void {
+        if (!this.monitor) return;
+
+        this.emit('onlineUpdate', online);
     }
 };

@@ -111,6 +111,12 @@ export const controller: DeviceControllerClass = class RemoteController
         this.emit('statusUpdate', status);
     }
 
+    private notifyOnline(online: DeviceStatus['online']): void {
+        if (!this.monitor) return;
+
+        this.emit('onlineUpdate', online);
+    }
+
     private startConnection() {
         if (!this.wsReconnectTimer) {
             this.wsReconnectTimer = setInterval(() => {
@@ -220,7 +226,8 @@ export const controller: DeviceControllerClass = class RemoteController
     }
 
     private wsOnClose(): void {
-        console.warn(`Remote Controller disconnected from ${this.address}!`)
+        this.notifyOnline(false);
+        console.warn(`Remote Controller disconnected from ${this.address}!`);
     }
 
     private wsOnError(error: Error): void {

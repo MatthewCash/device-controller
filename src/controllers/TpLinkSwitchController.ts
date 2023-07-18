@@ -27,6 +27,7 @@ export const controller: DeviceControllerClass = class TpLinkSwitchController
     private pollInterval: NodeJS.Timer;
 
     private lastState: any;
+    private failureCount = 0;
 
     constructor(config: TpLinkSwitchControllerConfig) {
         super();
@@ -41,9 +42,10 @@ export const controller: DeviceControllerClass = class TpLinkSwitchController
         if (this.monitor) {
             this.pollInterval = setInterval(async () => {
                 const state = await this.tplinkSwitch.poll().catch(() => null);
-                if (!state) return;
 
                 if (
+                    state != null &&
+                    typeof state === 'object' &&
                     this.lastState &&
                     Object.keys(state).every(
                         key => state[key] === this.lastState[key]
@@ -53,7 +55,19 @@ export const controller: DeviceControllerClass = class TpLinkSwitchController
 
                 this.lastState = state;
 
-                this.notifyState(state);
+                if (state != null) {
+                    this.failureCount = 0;
+                    this.notifyState(state);
+                } else {
+                    this.failureCount++;
+
+                    if (this.failureCount === 50) {
+                        console.warn(
+                            `Switch ${this.ipAddress} is offline after ${this.failureCount} poll failures!`
+                        );
+                        this.notifyOnline(false);
+                    }
+                }
             }, 100);
         }
     }
@@ -75,5 +89,11 @@ export const controller: DeviceControllerClass = class TpLinkSwitchController
         if (!this.monitor) return;
 
         this.emit('update', state);
+    }
+
+    private notifyOnline(online: DeviceStatus['online']): void {
+        if (!this.monitor) return;
+
+        this.emit('onlineUpdate', online);
     }
 };
