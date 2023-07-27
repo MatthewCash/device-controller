@@ -161,6 +161,8 @@ export const controller: DeviceControllerClass = class RemoteController
         console.log(
             `Remote Controller connected and authorized with ${this.address} for "${this.deviceId}"`
         );
+
+        this.notifyOnline(true);
         this.wsSendMessage({
             commands: [
                 {
@@ -215,6 +217,7 @@ export const controller: DeviceControllerClass = class RemoteController
 
         if (data?.connection?.ping === true) {
             this.wsAlive = true;
+            this.notifyOnline(true);
             this.wsSendMessage({ connection: { pong: true } });
         }
 
