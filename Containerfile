@@ -1,9 +1,9 @@
-FROM node:18-slim AS build
+FROM docker.io/node:18-slim AS build
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY src src
 COPY tsconfig.json .
