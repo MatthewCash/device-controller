@@ -1,5 +1,5 @@
 import { setTimeout } from 'timers/promises';
-import { devices } from '../main';
+import { DeviceUpdate, devices } from '../main';
 
 export const run = async () => {
     const computer = devices.get('computer');
@@ -14,17 +14,23 @@ export const run = async () => {
     if (computer?.status.state?.power) {
         computer.requestStateUpdate({ power: false });
 
+        let updateCallback: (update: DeviceUpdate) => void;
         await Promise.race([
-            new Promise<void>(r =>
-                computer.once('update', update => {
-                    if (!update.status.state?.power) r();
-                })
-            ),
+            new Promise<void>(r => {
+                updateCallback = update => {
+                    if (update.status.state?.power === false) r();
+                };
+                computer.on('update', updateCallback);
+            }),
             setTimeout(60000)
         ]);
+        computer.removeListener('update', updateCallback);
     }
 
-    [...devices.values()]
+    Array.from(devices.values())
         .filter(device => device.capabilities.includes('bool-switch'))
-        .forEach(device => device.requestStateUpdate({ power: false }));
+        .forEach(device => {
+            console.log(`setting ${device.id} to off`);
+            device.requestStateUpdate({ power: false });
+        });
 };
