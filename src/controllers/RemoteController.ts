@@ -230,11 +230,15 @@ export const controller: DeviceControllerClass = class RemoteController
 
     private wsOnClose(): void {
         this.notifyOnline(false);
-        console.warn(`Remote Controller disconnected from ${this.address}!`);
+        console.log(
+            `Remote Controller disconnected from ${this.address} for "${this.deviceId}"`
+        );
     }
 
     private wsOnError(error: Error): void {
-        console.warn(`Remote Controller disconnected from ${this.address}!:`);
+        console.log(
+            `Remote Controller error from ${this.address} for "${this.deviceId}"`
+        );
         console.error(error);
     }
 
