@@ -130,7 +130,7 @@ export const controller: DeviceControllerClass = class RemoteController
     }
 
     private connectToWebSocket() {
-        if (this.ws?.readyState !== WebSocket.CLOSED) this.ws?.close();
+        if (this.ws?.readyState !== WebSocket.CLOSED) this.ws?.terminate();
 
         this.wsAlive = false;
         this.wsAuthorized = false;
