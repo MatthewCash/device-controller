@@ -103,7 +103,7 @@ const onMessage = async (
         parseCommands(data?.commands);
     }
 
-    if (!client.state?.authorized) {
+    if (data.connection?.pong == null && !client.state?.authorized) {
         client.state.authorized = await verifyWsMessage(data, client).catch(
             () => false
         );
